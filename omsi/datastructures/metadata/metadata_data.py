@@ -12,7 +12,7 @@ class metadata_dict(dict):
         super(metadata_dict, self).__init__()
 
     def __setitem__(self, key, value):
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise KeyError('Metadata keys must be string names')
         if not isinstance(value, metadata_value):
             raise ValueError('Metadata values must be defined via metadata_value dicts')
@@ -24,19 +24,19 @@ class metadata_dict(dict):
         """
         Get a list of all metadata values.
         """
-        return [metadata_val['value'] for metadata_val in self.values()]
+        return [metadata_val['value'] for metadata_val in list(self.values())]
 
     def get_metadata_descriptions(self):
         """
         Get a list of all metadata descriptions
         """
-        return [metadata_val['description'] for metadata_val in self.values()]
+        return [metadata_val['description'] for metadata_val in list(self.values())]
 
     def get_metadata_units(self):
         """
         Get a list of all metadata units
         """
-        return [metadata_val['unit'] for metadata_val in self.values()]
+        return [metadata_val['unit'] for metadata_val in list(self.values())]
 
 
 class metadata_value(dict):
@@ -94,17 +94,17 @@ class metadata_value(dict):
         self['name'] = name
 
     def __setitem__(self, key, value):
-        if key in self.keys():
-            if key == 'name' and not (isinstance(value, basestring) or value is None):
+        if key in list(self.keys()):
+            if key == 'name' and not (isinstance(value, str) or value is None):
                 raise ValueError('The name value must be a string')
-            elif key == 'description' and not (isinstance(value, basestring) or value is None):
+            elif key == 'description' and not (isinstance(value, str) or value is None):
                 raise ValueError('The description value must be a string')
-            elif key == 'unit' and not (isinstance(value, basestring) or value is None):
+            elif key == 'unit' and not (isinstance(value, str) or value is None):
                 raise ValueError('The unit must be a string')
 
             dict.__setitem__(self, key, value)
         else:
-            raise KeyError('Illegal key ' + str(key) + ' given. Valid keys are ' + str(self.keys()))
+            raise KeyError('Illegal key ' + str(key) + ' given. Valid keys are ' + str(list(self.keys())))
 
     def __getattr__(self, item):
         """
@@ -113,7 +113,7 @@ class metadata_value(dict):
         :return: Value of the attribute
         :raises: AttributeError if the attribute is not found
         """
-        if item in self.keys():
+        if item in list(self.keys()):
             return self[item]
         else:
             raise AttributeError("'metadata_value' has not attribute " + str(item))

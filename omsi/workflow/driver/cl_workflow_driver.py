@@ -286,7 +286,7 @@ class cl_workflow_driver(workflow_driver_base):
                                                       default='INFO',
                                                       required=False,
                                                       help='Specify the level of logging to be used.',
-                                                      choices=log_helper.log_levels.keys())
+                                                      choices=list(log_helper.log_levels.keys()))
 
     def parse_cl_arguments(self):
         """
@@ -345,7 +345,7 @@ class cl_workflow_driver(workflow_driver_base):
         # The --loglevel argument
         if self.log_level_arg_name in parsed_arguments:
             self.user_log_level = parsed_arguments.pop(self.log_level_arg_name)
-            if self.user_log_level in log_helper.log_levels.keys():
+            if self.user_log_level in list(log_helper.log_levels.keys()):
                 log_helper.set_log_level(level=log_helper.log_levels[self.user_log_level])
             else:
                 self.user_log_level = None
@@ -412,7 +412,7 @@ class cl_workflow_driver(workflow_driver_base):
                 arg_group_dict = {arg_param.get_group_name(): arg_param.get_group_description()
                                   for arg_param in analysis.get_all_parameter_data()
                                   if arg_param.get_group_name() is not None}
-                for group_name, group_description in arg_group_dict.iteritems():
+                for group_name, group_description in arg_group_dict.items():
                     ana_arg_group_name = arg_group_name + ":" + group_name
                     analysis_arg_groups[group_name] = self.parser.add_argument_group(title=ana_arg_group_name,
                                                                                      description=group_description)
@@ -514,7 +514,7 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Consume the arguments for the different analyses
         self.analysis_arguments = parsed_arguments
-        for arg_key, arg_value in self.analysis_arguments.iteritems():
+        for arg_key, arg_value in self.analysis_arguments.items():
             ana_identifier, arg_key = arg_key.split(target_seperator)
             self.workflow_executor.analysis_tasks[ana_identifier][arg_key] = arg_value
             # Make sure we use the user-specified log level, even if it is set differently in the scripts
@@ -526,15 +526,15 @@ class cl_workflow_driver(workflow_driver_base):
         Print the analysis settings.
         """
         log_helper.info(__name__, "Inputs:")
-        for key, value in sorted(self.analysis_arguments.iteritems()):
-            log_helper.info(__name__, "   " + unicode(key) + " = " + unicode(value))
+        for key, value in sorted(self.analysis_arguments.items()):
+            log_helper.info(__name__, "   " + str(key) + " = " + str(value))
         if self.output_target is not None:
             if isinstance(self.output_target, omsi_file_common):
                 h5py_object = omsi_file_common.get_h5py_object(self.output_target)
-                log_helper.info(__name__, "Save to: " + unicode(h5py_object.file.filename)
-                                + u":" + unicode(h5py_object.name))
+                log_helper.info(__name__, "Save to: " + str(h5py_object.file.filename)
+                                + ":" + str(h5py_object.name))
             else:
-                log_helper.info(__name__, "Save to: " + unicode(self.output_target))
+                log_helper.info(__name__, "Save to: " + str(self.output_target))
 
     def print_time_and_usage_profiles(self):
         """
@@ -543,10 +543,10 @@ class cl_workflow_driver(workflow_driver_base):
         for analysis in self.workflow_executor.analysis_tasks:
             stats_obj = analysis.get_profile_stats_object(consolidate=True)
             if stats_obj is not None:
-                print ""
-                print "PROFILING DATA: TIME AND USAGE: " + analysis.get_analysis_identifier() + " : " + \
-                    analysis.get_analysis_type()
-                print ""
+                print("")
+                print("PROFILING DATA: TIME AND USAGE: " + analysis.get_analysis_identifier() + " : " + \
+                    analysis.get_analysis_type())
+                print("")
                 stats_obj.print_stats()
 
     def print_memory_profiles(self):
@@ -557,10 +557,10 @@ class cl_workflow_driver(workflow_driver_base):
         for analysis in self.workflow_executor.analysis_tasks:
             mem_profile_info = analysis.get_memory_profile_info()
             if mem_profile_info is not None:
-                print ""
-                print "PROFILING DATA: MEMORY"
-                print ""
-                print mem_profile_info
+                print("")
+                print("PROFILING DATA: MEMORY")
+                print("")
+                print(mem_profile_info)
 
     def remove_output_target(self):
         """
@@ -577,11 +577,11 @@ class cl_workflow_driver(workflow_driver_base):
         if self.__output_target_self is not None:
             try:
                 os.remove(self.__output_target_self)
-                log_helper.info(__name__, "Successfully removed output target: " + unicode(self.__output_target_self))
+                log_helper.info(__name__, "Successfully removed output target: " + str(self.__output_target_self))
                 success = True
             except:
                 log_helper.error(__name__, "Clean-up of output failed. File may be left on system: "
-                                 + unicode(self.__output_target_self))
+                                 + str(self.__output_target_self))
         elif self.output_target is not None:
             log_helper.info(__name__, "Output target not removed because it was not created " +
                                       "by the analysis but potentially modified by it")

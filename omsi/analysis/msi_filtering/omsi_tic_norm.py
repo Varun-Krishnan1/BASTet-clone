@@ -91,7 +91,7 @@ class omsi_tic_norm(analysis_base):
                 idx_mz = np.concatenate([idx_mz, temp[0]])
             idx_mz = idx_mz.astype(int)
         else:
-            idx_mz = range(nz)
+            idx_mz = list(range(nz))
 
         output_filename = TemporaryFile()  # Create a temporary file to compute the normalization out-of-core
         idx = np.linspace(0, nx, 20, dtype='int')  # Divide the data into chunks in x to process the data in blocks
@@ -255,7 +255,7 @@ class omsi_tic_norm(analysis_base):
                 if xsize != ysize:
                     raise ValueError("x and y selection size do not match")
                 data = np.zeros(shape=(xsize, dataset.shape[2]), dtype=dataset.dtype)
-                for i in xrange(0, xsize):
+                for i in range(0, xsize):
                     data[i, :] = dataset[x_select[i], y_select[i], :]
             else:
                 data = dataset[x_select, y_select, :]
@@ -292,12 +292,12 @@ class omsi_tic_norm(analysis_base):
         label_slice = None
 
         norm_msidata_shape = analysis_object['norm_msidata'].shape
-        valuesX = range(0, norm_msidata_shape[0])
+        valuesX = list(range(0, norm_msidata_shape[0]))
         labelX = 'pixel index X'
-        valuesY = range(0, norm_msidata_shape[1])
+        valuesY = list(range(0, norm_msidata_shape[1]))
         labelY = 'pixel index Y'
         if len(norm_msidata_shape) > 3:
-            valuesZ = range(0, norm_msidata_shape[2])
+            valuesZ = list(range(0, norm_msidata_shape[2]))
             labelZ = 'pixel index Z'
         else:
             valuesZ = None

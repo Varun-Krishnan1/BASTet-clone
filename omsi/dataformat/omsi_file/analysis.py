@@ -175,7 +175,7 @@ class omsi_analysis_manager(omsi_file_object_manager):
         """
         output_list = []
         # Iterate through all groups of the root folder
-        for item_obj in self.analysis_parent.items():
+        for item_obj in list(self.analysis_parent.items()):
             if item_obj[0].startswith(omsi_format_analysis.analysis_groupname):
                 cur_ana_id = omsi_file_analysis(
                     self.analysis_parent[item_obj[0]]).get_analysis_identifier()
@@ -197,8 +197,8 @@ class omsi_analysis_manager(omsi_file_object_manager):
         :returns: omsi_file_analysis object for the requested analysis. The function
                       returns None in case the analysis object was not found.
         """
-        analysis_name = unicode(omsi_format_analysis.analysis_groupname + str(analysis_index))
-        if analysis_name in self.analysis_parent.keys():
+        analysis_name = str(omsi_format_analysis.analysis_groupname + str(analysis_index))
+        if analysis_name in list(self.analysis_parent.keys()):
             return omsi_file_analysis(self.analysis_parent[analysis_name])
         else:
             return None
@@ -215,7 +215,7 @@ class omsi_analysis_manager(omsi_file_object_manager):
         """
 
         # Iterate through all groups of the root folder
-        for item_obj in self.analysis_parent.items():
+        for item_obj in list(self.analysis_parent.items()):
             if item_obj[0].startswith(omsi_format_analysis.analysis_groupname):
                 cur_ana_id = omsi_file_analysis(self.analysis_parent[item_obj[0]]).get_analysis_identifier()
                 if cur_ana_id is not None:
@@ -295,7 +295,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                                                             omsi_format_analysis.analysis_groupname)
         # 2.2.2 Create the name of the group and check if it already exists
         analysis_group_name = omsi_format_analysis.analysis_groupname + str(analysis_index)
-        if analysis_group_name in parent_group.keys():
+        if analysis_group_name in list(parent_group.keys()):
             raise IndexError("An analysis with the requested index already exists.")
 
         # 3. Check if we need to save the analysis or whether it has already been saved
@@ -365,7 +365,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
 
         # 1. Write the analysis name
         analysis_identifier_data = analysis_group.require_dataset(
-            name=unicode(omsi_format_analysis.analysis_identifier),
+            name=str(omsi_format_analysis.analysis_identifier),
             shape=(1,),
             dtype=omsi_format_common.str_type)
         if omsi_format_common.str_type_unicode:
@@ -374,7 +374,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
             analysis_identifier_data[0] = str(analysis.get_analysis_identifier())
 
         # 2. Write the analysis type
-        analysis_type_data = analysis_group.require_dataset(name=unicode(omsi_format_analysis.analysis_type),
+        analysis_type_data = analysis_group.require_dataset(name=str(omsi_format_analysis.analysis_type),
                                                             shape=(1,),
                                                             dtype=omsi_format_common.str_type)
         if omsi_format_common.str_type_unicode:
@@ -455,18 +455,18 @@ class omsi_file_analysis(omsi_dependencies_manager,
 
         # 6. Write all the runtime execution information
         runinfo_group = analysis_group.require_group(omsi_format_analysis.analysis_runinfo_group)
-        for run_info_key, run_info_value in analysis.get_all_run_info().items():
+        for run_info_key, run_info_value in list(analysis.get_all_run_info().items()):
             # Generate an analysis_data object in order to use the
             # __write_omsi_analysis_data function to write the data
-            if isinstance(run_info_value, unicode) or isinstance(run_info_value, str):
-                anadata = analysis_data(name=unicode(run_info_key),
+            if isinstance(run_info_value, str) or isinstance(run_info_value, str):
+                anadata = analysis_data(name=str(run_info_key),
                                         data=run_info_value,
                                         dtype=omsi_format_common.str_type)
             else:
                 dat = np.asarray(run_info_value)
                 if len(dat.shape) == 0:
                     dat = np.asarray([run_info_value])
-                anadata = analysis_data(name=unicode(run_info_key),
+                anadata = analysis_data(name=str(run_info_key),
                                         data=dat,
                                         dtype=dat.dtype)
             cls.__write_omsi_analysis_data__(runinfo_group, anadata)
@@ -494,7 +494,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
             # with storing string with NULL characters in HDF5
             class_pickle_arr = np.fromstring(class_pickle,
                                             dtype=omsi_format_analysis.analysis_class_pickle_np_dtype)
-            analysis_group[unicode(omsi_format_analysis.analysis_class)] = class_pickle_arr
+            analysis_group[str(omsi_format_analysis.analysis_class)] = class_pickle_arr
         except:
             log_helper.warning(__name__, "Could not save the analysis class.")
             pass
@@ -550,12 +550,12 @@ class omsi_file_analysis(omsi_dependencies_manager,
                         omsi_format_common.type_attribute] = omsiobjtype
         # Create a new string-type dataset
         elif (curr_dtype == omsi_format_common.str_type) or (curr_dtype == h5py.special_dtype(vlen=str)):
-            tempdata = data_group.require_dataset(name=unicode(ana_data['name']),
+            tempdata = data_group.require_dataset(name=str(ana_data['name']),
                                                   shape=(1,),
                                                   dtype=omsi_format_common.str_type)
-            if len(unicode(ana_data['data'])) > 0:
+            if len(str(ana_data['data'])) > 0:
                 if omsi_format_common.str_type_unicode:
-                    tempdata[0] = unicode(ana_data['data'])
+                    tempdata[0] = str(ana_data['data'])
                 else:
                     tempdata[0] = str(ana_data['data'])
             else:
@@ -593,7 +593,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
             # Safely convert scalars to numpy but warn in case we see something else
             from omsi.datastructures.analysis_data import data_dtypes
             default_dtypes = data_dtypes.get_dtypes()
-            if ana_data['dtype'] not in default_dtypes.keys() and ana_data['dtype'] not in default_dtypes.values():
+            if ana_data['dtype'] not in list(default_dtypes.keys()) and ana_data['dtype'] not in list(default_dtypes.values()):
                 warnings.warn("WARNING: " + str(ana_data['name']) +
                               ": The data specified by the analysis object is not " +
                               "in numpy format. Attempting to convert the data to numpy")
@@ -639,9 +639,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
         # self.dependencies = ...
         if self.dependencies is None:
             warnings.warn("No dependencies defined for analysis.")
-        self.parameter = self.managed_group[unicode(omsi_format_analysis.analysis_parameter_group)]
+        self.parameter = self.managed_group[str(omsi_format_analysis.analysis_parameter_group)]
         try:
-            self.runinfo_group = self.managed_group[unicode(omsi_format_analysis.analysis_runinfo_group)]
+            self.runinfo_group = self.managed_group[str(omsi_format_analysis.analysis_runinfo_group)]
         except:
             self.runinfo_group = None
         self.name = self.managed_group.name
@@ -677,7 +677,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 self.parameter[key] = value
             except:
                 try:
-                    if key in self.dependencies.items():
+                    if key in list(self.dependencies.items()):
                         raise KeyError(
                             "Assignment to dependcies is not permitted via this mechanism")
                     else:
@@ -708,7 +708,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
             return None
 
         try:
-            return self.managed_group[unicode(omsi_format_analysis.analysis_identifier)]
+            return self.managed_group[str(omsi_format_analysis.analysis_identifier)]
         except:
             return None
 
@@ -725,7 +725,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         if self.managed_group is None:
             return None
         try:
-            return self.managed_group[unicode(omsi_format_analysis.analysis_type)]
+            return self.managed_group[str(omsi_format_analysis.analysis_type)]
         except:
             return None
 
@@ -742,8 +742,8 @@ class omsi_file_analysis(omsi_dependencies_manager,
             analysis_class = analysis_views.analysis_name_to_class(self.get_analysis_type()[0])
         except NameError:
             # Try to restore the analysis pickle if we saved it to file
-            if omsi_format_analysis.analysis_class in self.managed_group.keys():
-                class_pickle = self.managed_group[unicode(omsi_format_analysis.analysis_class)][:]
+            if omsi_format_analysis.analysis_class in list(self.managed_group.keys()):
+                class_pickle = self.managed_group[str(omsi_format_analysis.analysis_class)][:]
                 # Restore the pickle string we stored as uint8 array to avoid problems with NULL
                 class_pickle_string = class_pickle.tostring()
                 analysis_class = pickle.loads(class_pickle_string)
@@ -762,7 +762,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         """
         output_list = []
         if self.managed_group is not None:
-            for item_obj in self.managed_group.items():
+            for item_obj in list(self.managed_group.items()):
                 if item_obj[0] != omsi_format_analysis.analysis_identifier and \
                         item_obj[0] != omsi_format_analysis.analysis_type and \
                         item_obj[0] != omsi_format_analysis.analysis_parameter_group and \
@@ -784,18 +784,18 @@ class omsi_file_analysis(omsi_dependencies_manager,
         output_shape_dict = {}
         output_type_dict = {}
         if self.managed_group is not None:
-            for item_obj in self.managed_group.items():
+            for item_obj in list(self.managed_group.items()):
                 if item_obj[0] != omsi_format_analysis.analysis_identifier and \
                         item_obj[0] != omsi_format_analysis.analysis_type and \
                         item_obj[0] != omsi_format_analysis.analysis_parameter_group and \
                         item_obj[0] != omsi_format_dependencies.dependencies_groupname and \
                         item_obj[0] != omsi_format_analysis.analysis_runinfo_group:
                     try:
-                        output_shape_dict[item_obj[0]] = self.managed_group[unicode(item_obj[0])].shape
+                        output_shape_dict[item_obj[0]] = self.managed_group[str(item_obj[0])].shape
                     except:
                         output_shape_dict[item_obj[0]] = (0,)
                     try:
-                        output_type_dict[item_obj[0]] = self.managed_group[unicode(item_obj[0])].dtype
+                        output_type_dict[item_obj[0]] = self.managed_group[str(item_obj[0])].dtype
                     except:
                         output_type_dict[item_obj[0]] = "Unkown type"
         return output_shape_dict, output_type_dict
@@ -814,7 +814,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         from omsi.datastructures.analysis_data import analysis_data
         output_list = []
         if self.managed_group is not None:
-            for item_obj in self.managed_group.items():
+            for item_obj in list(self.managed_group.items()):
                 if item_obj[0] != omsi_format_analysis.analysis_identifier and \
                         item_obj[0] != omsi_format_analysis.analysis_type and \
                         item_obj[0] != omsi_format_analysis.analysis_parameter_group and \
@@ -823,16 +823,16 @@ class omsi_file_analysis(omsi_dependencies_manager,
                     output_list.append(analysis_data())
                     output_list[-1]['name'] = str(item_obj[0])
                     if load_data:
-                        if len(self.managed_group[unicode(item_obj[0])].shape) == 0:  # Scalar dataset
-                            output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])][()]
+                        if len(self.managed_group[str(item_obj[0])].shape) == 0:  # Scalar dataset
+                            output_list[-1]['data'] = self.managed_group[str(item_obj[0])][()]
                         else:
-                            output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])][:]
+                            output_list[-1]['data'] = self.managed_group[str(item_obj[0])][:]
                     else:
-                        output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])]
-                    if not isinstance(output_list[-1]['data'], basestring):
+                        output_list[-1]['data'] = self.managed_group[str(item_obj[0])]
+                    if not isinstance(output_list[-1]['data'], str):
                         output_list[-1]['dtype'] = str(output_list[-1]['data'].dtype)
                     else:
-                        output_list[-1]['dtype'] = unicode
+                        output_list[-1]['dtype'] = str
         return output_list
 
     def get_all_parameter_data(self,
@@ -850,28 +850,28 @@ class omsi_file_analysis(omsi_dependencies_manager,
         from omsi.datastructures.dependency_data import dependency_dict
         output_list = []
         if self.parameter is not None:
-            for item_obj in self.parameter.items():
-                curr_parameter = parameter_data(name=unicode(item_obj[0]),
+            for item_obj in list(self.parameter.items()):
+                curr_parameter = parameter_data(name=str(item_obj[0]),
                                                      help='')
-                curr_parameter_dataset = self.parameter[unicode(item_obj[0])]
+                curr_parameter_dataset = self.parameter[str(item_obj[0])]
                 if omsi_format_analysis.analysis_parameter_help_attr in curr_parameter_dataset.attrs:
-                    curr_parameter['help'] = unicode(
+                    curr_parameter['help'] = str(
                         curr_parameter_dataset.attrs[omsi_format_analysis.analysis_parameter_help_attr])
                 if load_data:
                     curr_parameter['data'] = curr_parameter_dataset[:]
                     # try to restore string parameters as stings
                     try:
                         if curr_parameter['data'].size == 1:
-                            if isinstance(curr_parameter['data'][0], basestring):
+                            if isinstance(curr_parameter['data'][0], str):
                                 curr_parameter['data'] = curr_parameter['data'][0]
                     except:
                         raise
                 else:
                     curr_parameter['data'] = curr_parameter_dataset
-                if not isinstance(curr_parameter['data'], basestring):
-                    curr_parameter['dtype'] = unicode(curr_parameter['data'].dtype)
+                if not isinstance(curr_parameter['data'], str):
+                    curr_parameter['dtype'] = str(curr_parameter['data'].dtype)
                 else:
-                    curr_parameter['dtype'] = unicode
+                    curr_parameter['dtype'] = str
                 output_list.append(curr_parameter)
         if not exclude_dependencies:
             dependency_data = self.get_all_dependency_data(omsi_dependency_format=False)
@@ -893,15 +893,15 @@ class omsi_file_analysis(omsi_dependencies_manager,
         """
         output_dict = run_info_dict()
         if self.runinfo_group is not None:
-            for item_obj in self.runinfo_group.items():
-                object_name = unicode(item_obj[0])
+            for item_obj in list(self.runinfo_group.items()):
+                object_name = str(item_obj[0])
                 if load_data:
                     output_dict[object_name] = self.runinfo_group[object_name][:]
                     if output_dict[object_name].shape == (1,):
                         curr_dtype = self.runinfo_group[object_name].dtype
-                        if curr_dtype == h5py.special_dtype(vlen=unicode) or \
-                                curr_dtype == h5py.special_dtype(vlen=unicode):
-                            output_dict[object_name] = unicode(output_dict[object_name][0])
+                        if curr_dtype == h5py.special_dtype(vlen=str) or \
+                                curr_dtype == h5py.special_dtype(vlen=str):
+                            output_dict[object_name] = str(output_dict[object_name][0])
                         else:
                             output_dict[object_name] = output_dict[object_name][0]
                 else:

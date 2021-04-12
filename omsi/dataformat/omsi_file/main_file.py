@@ -118,7 +118,7 @@ class omsi_file(omsi_experiment_manager,
         elif isinstance(filename, h5py.Group) or isinstance(filename, h5py.Dataset):
             self.hdf_file = filename.file
             self.hdf_filename = self.hdf_file.filename
-        elif isinstance(filename, basestring):
+        elif isinstance(filename, str):
             import os
             self.hdf_filename = filename  # Name of the HDF5 file
             if os.path.exists(filename):
@@ -191,11 +191,11 @@ class omsi_file(omsi_experiment_manager,
         # For each experiment (/entry_#) and dataset (/entry_#/data_#) write an according entry
         # poly.write("%d %f %f" % ( i , vertices[i,0] , vertices[i,1]  )  )
         numexp = self.get_num_experiments()
-        for exp_index in xrange(0, numexp):
+        for exp_index in range(0, numexp):
             exp = self.get_experiment(exp_index)
             numdat = exp.get_num_msidata()
             # For all datasets available for the experiment
-            for dataset_index in xrange(0, numdat):
+            for dataset_index in range(0, numdat):
                 data = exp.get_msidata(dataset_index)
                 size_x = data.shape[0]
                 size_y = data.shape[1]

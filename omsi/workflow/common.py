@@ -36,7 +36,7 @@ class analysis_task_list(list):
         :return: An instance of workflow_base with the specification of the workflow to be executed
         """
         scripts = []
-        inscripts = [script_files, ] if isinstance(script_files, basestring) else script_files
+        inscripts = [script_files, ] if isinstance(script_files, str) else script_files
         for script_path in inscripts:
             infile = open(script_path, 'r')
             scripttext = infile.read()
@@ -62,7 +62,7 @@ class analysis_task_list(list):
         from omsi.analysis.base import analysis_base
         current_analyses = cls.all()
         # Evaluate the workflows script
-        if isinstance(scripts, basestring):
+        if isinstance(scripts, str):
             exec(scripts)
         else:
             for script in scripts:
@@ -110,7 +110,7 @@ class analysis_task_list(list):
         """
         if isinstance(item, int):
             return list(self)[item]
-        elif isinstance(item, basestring):
+        elif isinstance(item, str):
             matching_analyses = []
             for ana_obj in self:
                 if ana_obj.analysis_identifier == item:
@@ -377,7 +377,7 @@ class analysis_task_list(list):
         for ana in self:
             current_identifier = ana.get_analysis_identifier()
             if current_identifier not in unique_identifiers:
-                ana.set_analysis_identifier('ana_' + str(ana_index) + "_" + unicode(current_identifier))
+                ana.set_analysis_identifier('ana_' + str(ana_index) + "_" + str(current_identifier))
             ana_index += 1
         return self
 

@@ -33,7 +33,7 @@ if not MPI_AVAILABLE:
         from omsi.shared.log import log_helper
         log_helper.warning(__name__, "MPI not available. Running in serial.")
     except:
-        print "MPI not available. Running in serial."
+        print("MPI not available. Running in serial.")
 
 import numpy as np
 import itertools
@@ -308,7 +308,7 @@ class parallel_over_axes(object):
             # Compute the list of all possible blocks
             base_blocks = [[slice(None)]] * len(self.main_data.shape)
             for axis_index in self.split_axes:
-                base_blocks[axis_index] = range(self.main_data.shape[axis_index])
+                base_blocks[axis_index] = list(range(self.main_data.shape[axis_index]))
             block_tuples = itertools.product(*base_blocks)
 
             # Communicate blocks with task ranks

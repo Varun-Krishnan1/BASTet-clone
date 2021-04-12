@@ -16,7 +16,7 @@ class findpeaks:
         y=self.y
         size=self.smooth  
 
-        x = np.array(range(-3*size,3*size))
+        x = np.array(list(range(-3*size,3*size)))
         g = np.exp(-(x**2)/(2.0*float(size)**2))
         g = g / g.sum()
             
@@ -122,6 +122,6 @@ class findpeaks:
         return maxtab, mintab
 
     def display(self):
-        print self.Name
-        print self.x
-        print self.y
+        print(self.Name)
+        print(self.x)
+        print(self.y)

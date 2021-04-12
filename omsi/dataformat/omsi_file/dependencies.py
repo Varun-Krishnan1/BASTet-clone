@@ -37,7 +37,7 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         self.dependencies_parent = dependencies_parent
         try:
             self.dependencies = omsi_file_dependencies(
-                self.dependencies_parent[unicode(omsi_format_dependencies.dependencies_groupname)])
+                self.dependencies_parent[str(omsi_format_dependencies.dependencies_groupname)])
         except:
             self.dependencies = None
 
@@ -336,8 +336,8 @@ class omsi_file_dependencies(omsi_file_common):
                 the dependencies. Access using [index]['name'] and [index]['data'].
         """
         output_list = []
-        for item_obj in self.managed_group.items():
-            omsi_object = omsi_file_dependencydata(self.managed_group[unicode(item_obj[0])])
+        for item_obj in list(self.managed_group.items()):
+            omsi_object = omsi_file_dependencydata(self.managed_group[str(item_obj[0])])
             if omsi_dependency_format:
                 output_list.append(omsi_object.get_omsi_dependency())
             else:
@@ -376,7 +376,7 @@ class omsi_file_dependencies(omsi_file_common):
         if dependency_list is None:
             dependency_list = []
         output_list = []
-        for item_obj in self.managed_group.items():
+        for item_obj in list(self.managed_group.items()):
             # omsi_obj is a omsi_file_dependencydata object
             omsi_obj = omsi_file_common.get_omsi_object(self.managed_group[item_obj[0]])
             # dependency_omsi_obj is the instance of the omsi API object we are depending on
@@ -384,7 +384,7 @@ class omsi_file_dependencies(omsi_file_common):
 
             # Add the object to the list of dependencies
             try:
-                omsi_object = omsi_file_dependencydata(self.managed_group[unicode(item_obj[0])])
+                omsi_object = omsi_file_dependencydata(self.managed_group[str(item_obj[0])])
                 if omsi_dependency_format:
                     output_list.append(omsi_object.get_omsi_dependency())
                 else:
@@ -392,7 +392,7 @@ class omsi_file_dependencies(omsi_file_common):
             except:
                 import sys
                 warnings.warn("WARNING: Error occurred in omsi_file_dependencies::get_all_dependency_data_recursive(...):  " + \
-                      unicode(item_obj[0]) + "   :" + str(sys.exc_info()))
+                      str(item_obj[0]) + "   :" + str(sys.exc_info()))
 
             # If we can have recursive dependencies then follow them
             if isinstance(dependency_omsi_obj, omsi_dependencies_manager):
@@ -532,10 +532,10 @@ class omsi_file_dependencies(omsi_file_common):
                 parent_index = len(nodes)-1
 
         # 3) Iterate through all dependencies
-        for item_obj in self.managed_group.items():
+        for item_obj in list(self.managed_group.items()):
             try:
                 # 3.1) Check if a node exists that represents the current dependency
-                dep_obj = omsi_file_dependencydata(self.managed_group[unicode(item_obj[0])])
+                dep_obj = omsi_file_dependencydata(self.managed_group[str(item_obj[0])])
                 omsi_obj = dep_obj.get_dependency_omsiobject(recursive=True)
                 curr_path = omsi_obj.name
                 curr_name = os.path.basename(curr_path)
@@ -693,7 +693,7 @@ class omsi_file_dependencydata(omsi_file_common):
         """
         dependency_name = dependency_data['link_name']
         # Check if the group already exists and raise an error if it does
-        if dependency_name in parent_group.keys():
+        if dependency_name in list(parent_group.keys()):
             raise KeyError("Another dependencies with the same index already exists.")
         new_dep_group = parent_group.require_group(dependency_name)
         new_dep_group.attrs[omsi_format_common.type_attribute] = "omsi_file_dependencydata"
@@ -723,19 +723,19 @@ class omsi_file_dependencydata(omsi_file_common):
         from omsi.datastructures.dependency_data import dependency_dict
         dep_group = dependency_group
         # 1) Save the name of the parameter
-        param_name_data = dep_group.require_dataset(name=unicode(omsi_format_dependencydata.dependency_parameter),
+        param_name_data = dep_group.require_dataset(name=str(omsi_format_dependencydata.dependency_parameter),
                                                     shape=(1,),
                                                     dtype=omsi_format_common.str_type)
         help_attr = omsi_format_dependencydata.dependency_parameter_help_attr
         if omsi_format_common.str_type_unicode:
             param_name_data[0] = dependency_data['param_name']
-            param_name_data.attrs[help_attr] = unicode(dependency_data['help'])
+            param_name_data.attrs[help_attr] = str(dependency_data['help'])
         else:
             param_name_data[0] = str(dependency_data['param_name'])
             param_name_data.attrs[help_attr] = str(dependency_data['help'])
 
         # 2) Save the selection
-        selection_data = dep_group.require_dataset(name=unicode(
+        selection_data = dep_group.require_dataset(name=str(
             omsi_format_dependencydata.dependency_selection), shape=(1,), dtype=omsi_format_common.str_type)
         if dependency_data['selection'] is not None:
             from omsi.shared.data_selection import check_selection_string
@@ -755,7 +755,7 @@ class omsi_file_dependencydata(omsi_file_common):
             selection_data[0] = ""
 
         # 3) Save the string describing the location of the main omsi object
-        mainname_data = dep_group.require_dataset(name=unicode(omsi_format_dependencydata.dependency_mainname),
+        mainname_data = dep_group.require_dataset(name=str(omsi_format_dependencydata.dependency_mainname),
                                                   shape=(1,),
                                                   dtype=omsi_format_common.str_type)
         # 3.1) Get the name of the object
@@ -776,24 +776,24 @@ class omsi_file_dependencydata(omsi_file_common):
             mainname_string = omsi_file_common.create_path_string(mainname_filename, mainname_string)
 
         # 3.3) Write the data to file
-        mainname_string = unicode(mainname_string) if omsi_format_common.str_type_unicode else str(mainname_string)
-        mainname_data[0] = unicode(mainname_string)
+        mainname_string = str(mainname_string) if omsi_format_common.str_type_unicode else str(mainname_string)
+        mainname_data[0] = str(mainname_string)
 
         # 4) Save the additional dataset name
-        dataset_data = dep_group.require_dataset(name=unicode(
+        dataset_data = dep_group.require_dataset(name=str(
             omsi_format_dependencydata.dependency_datasetname), shape=(1,), dtype=omsi_format_common.str_type)
         if dependency_data['dataname']:
             if omsi_format_common.str_type_unicode:
-                dataset_data[0] = unicode(dependency_data['dataname'])
+                dataset_data[0] = str(dependency_data['dataname'])
             else:
                 dataset_data[0] = str(dependency_data['dataname'])
         else:
-            dataset_data[0] = u'' if omsi_format_common.str_type_unicode else ''
+            dataset_data[0] = '' if omsi_format_common.str_type_unicode else ''
 
         # Save the dependency type if specified
         if dependency_data['dependency_type'] != dependency_dict.dependency_types['undefined']:
             dependency_type_data = dep_group.require_dataset(
-                name=unicode(omsi_format_dependencydata.dependency_typename),
+                name=str(omsi_format_dependencydata.dependency_typename),
                 shape=(1,),
                 dtype=omsi_format_common.str_type)
             dependency_type_data[0] = dependency_data['dependency_type'] if \
@@ -820,7 +820,7 @@ class omsi_file_dependencydata(omsi_file_common):
         dependency is pointing so that we can interact with the dependency as if it were the
         linked object.
         """
-        if isinstance(key, str) or isinstance(key, unicode):
+        if isinstance(key, str) or isinstance(key, str):
             if key == omsi_format_dependencydata.dependency_mainname or \
                key == omsi_format_dependencydata.dependency_datasetname:
                 return omsi_file_common.get_omsi_object(self.managed_group[key])
@@ -828,11 +828,11 @@ class omsi_file_dependencydata(omsi_file_common):
                 return self.managed_group[key][0]
         else:
             omsi_object_name = self.managed_group[
-                unicode(omsi_format_dependencydata.dependency_mainname)][0]
-            h5py_object = self.managed_group.file[unicode(omsi_object_name)]
+                str(omsi_format_dependencydata.dependency_mainname)][0]
+            h5py_object = self.managed_group.file[str(omsi_object_name)]
             omsi_object = omsi_file_common.get_omsi_object(h5py_object)
             dataset_name = self.managed_group[
-                unicode(omsi_format_dependencydata.dependency_datasetname)][0]
+                str(omsi_format_dependencydata.dependency_datasetname)][0]
             if len(dataset_name) > 0:
                 return omsi_object[dataset_name][key]
             else:
@@ -858,7 +858,7 @@ class omsi_file_dependencydata(omsi_file_common):
         :returns: Selection string. See the omsi.shared.omsi_data_selection for helper functions to
                   deal with selection strings.
         """
-        return self.managed_group[unicode(omsi_format_dependencydata.dependency_selection)][0]
+        return self.managed_group[str(omsi_format_dependencydata.dependency_selection)][0]
 
     def get_parameter_name(self):
         """
@@ -866,15 +866,15 @@ class omsi_file_dependencydata(omsi_file_common):
 
         :returns: String of the parameter name that has the dependency.
         """
-        return self.managed_group[unicode(omsi_format_dependencydata.dependency_parameter)][0]
+        return self.managed_group[str(omsi_format_dependencydata.dependency_parameter)][0]
 
     def get_parameter_help(self):
         """
         Get the help string for the parameter name if available.
         """
         try:
-            group_name = unicode(omsi_format_dependencydata.dependency_parameter)
-            attr_name = unicode(omsi_format_dependencydata.dependency_parameter_help_attr)
+            group_name = str(omsi_format_dependencydata.dependency_parameter)
+            attr_name = str(omsi_format_dependencydata.dependency_parameter_help_attr)
             return self.managed_group.attrs[attr_name]
         except:
             return ""
@@ -887,7 +887,7 @@ class omsi_file_dependencydata(omsi_file_common):
         :returns: String indicating the name of the optional dataset.
         """
         try:
-            return self.managed_group[unicode(omsi_format_dependencydata.dependency_datasetname)][0]
+            return self.managed_group[str(omsi_format_dependencydata.dependency_datasetname)][0]
         except:
             return ""
 
@@ -897,7 +897,7 @@ class omsi_file_dependencydata(omsi_file_common):
 
         :return: String indicating the main name of the object that we link to
         """
-        return self.managed_group[unicode(omsi_format_dependencydata.dependency_mainname)][0]
+        return self.managed_group[str(omsi_format_dependencydata.dependency_mainname)][0]
 
     def get_dependency_type(self):
         """
@@ -908,8 +908,8 @@ class omsi_file_dependencydata(omsi_file_common):
 
         :return: String indicating the type of the dependency or None if the type is not known.
         """
-        if omsi_format_dependencydata.dependency_typename in self.managed_group.keys():
-            return self.managed_group[unicode(omsi_format_dependencydata.dependency_typename)][0]
+        if omsi_format_dependencydata.dependency_typename in list(self.managed_group.keys()):
+            return self.managed_group[str(omsi_format_dependencydata.dependency_typename)][0]
         else:
             from omsi.datastructures.dependency_data import dependency_dict
             param_name = self.get_parameter_name()
@@ -955,7 +955,7 @@ class omsi_file_dependencydata(omsi_file_common):
                     h5py_file = h5py.File(filename, 'r')
                     warnings.warn('External dependency forced to be opened in read-only mode.')
 
-        h5py_object = h5py_file.file[unicode(omsi_object_name)]
+        h5py_object = h5py_file.file[str(omsi_object_name)]
         omsi_object = omsi_file_common.get_omsi_object(h5py_object,
                                                        resolve_dependencies=recursive)
         return omsi_object

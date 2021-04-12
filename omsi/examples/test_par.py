@@ -25,7 +25,7 @@ def main(argv=None):
         
     #Check for correct usage
     if len(argv) !=4 :
-        print "Wrong usage."
+        print("Wrong usage.")
         exit(0)
         
     omsiFile  = argv[1]
@@ -57,11 +57,11 @@ def main(argv=None):
         for i in range(0,repeats ) :
 
             start = time.time()
-            procs = map(create_process, map(lambda lst : (omsiFile, numP, mp_arr , xdim, ydim, zdim, lst) ,  range(0,numP) ))  
-            map(lambda p : p.start(), procs)  
-            map(lambda p : p.join(), procs)  
+            procs = list(map(create_process, [(omsiFile, numP, mp_arr , xdim, ydim, zdim, lst) for lst in range(0,numP)]))  
+            list(map(lambda p : p.start(), procs))  
+            list(map(lambda p : p.join(), procs))  
             timings[i]  = time.time() - start
-            print timings[i]
+            print(timings[i])
             for p in procs :
                 p.terminate()
        
@@ -74,12 +74,12 @@ def main(argv=None):
         allRes[numP-1]['select_std'] = np.std( timings)
         allRes[numP-1]['select_var'] = np.var( timings)
 
-        print "----------"+str(numP)+"-----------"
-        print "Max:" +str( np.max( timings ) )
-        print "Median:"+ str( np.median( timings) )
-        print "Mean:" + str( np.mean( timings) )
-        print "Std: " + str( np.std( timings ) )
-        print "Min: " + str( np.min( timings ) )
+        print("----------"+str(numP)+"-----------")
+        print("Max:" +str( np.max( timings ) ))
+        print("Median:"+ str( np.median( timings) ))
+        print("Mean:" + str( np.mean( timings) ))
+        print("Std: " + str( np.std( timings ) ))
+        print("Min: " + str( np.min( timings ) ))
 
         os.remove( omsiFile  )
     
@@ -166,7 +166,7 @@ def generateBaseTestFile( omsiOutFile , xdim , ydim, zdim ) :
     try:
         omsiFile = omsi_file( omsiOutFile )
     except:
-        print "Unexpected error creating the output file:", sys.exc_info()[0]
+        print("Unexpected error creating the output file:", sys.exc_info()[0])
         exit(0)
         
     exp = omsiFile.create_experiment( exp_identifier = "test" )
@@ -179,10 +179,10 @@ def generateBaseTestFile( omsiOutFile , xdim , ydim, zdim ) :
     #Allocate space in the HDF5 file for the img data
     data = exp.create_msidata_full_cube(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' , chunks=None )
     #Write data one spectrum at a time
-    for xi in xrange( 0 , xdim ) :
+    for xi in range( 0 , xdim ) :
         sys.stdout.write("[" +str( int( 100.* float(xi)/float(xdim) )) +"%]"+ "\r")
         sys.stdout.flush()
-        for yi in xrange( 0 , ydim ) :
+        for yi in range( 0 , ydim ) :
             #Save the spectrum to the hdf5 file
             data[xi,yi,:] = (xi*ydim + yi)
 
@@ -197,7 +197,7 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
     
     writeFullSpectra=False
     useChunking = (xchunk>0 and ychunk>0 and zchunk>0 ) 
-    print useChunking
+    print(useChunking)
     useDonorFile = True
     if useDonorFile :
         inFile = omsi_file( donorFile )
@@ -209,7 +209,7 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
     try:
         omsiFile = omsi_file( omsiOutFile )
     except:
-        print "Unexpected error creating the output file:", sys.exc_info()[0]
+        print("Unexpected error creating the output file:", sys.exc_info()[0])
         exit(0)
         
     exp = omsiFile.create_experiment( exp_identifier = "test" )
@@ -237,7 +237,7 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
         numChunksX = int( math.ceil( float(xdim)/float(xchunk) ) )
         numChunksY = int( math.ceil( float(ydim)/float(ychunk) ) )
         numChunksZ = int( math.ceil( float(zdim)/float(zchunk) ) )
-        print "NumChunks : "+str(numChunksX)+" "+str(numChunksY)+" "+str(numChunksZ)
+        print("NumChunks : "+str(numChunksX)+" "+str(numChunksY)+" "+str(numChunksZ))
         numChunks =  numChunksX*numChunksY*numChunksZ
 
     else :
@@ -248,14 +248,14 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
 
     if not useDonorFile :
         if writeFullSpectra :
-            print "Writing mxm spectra at a time (artifical data)"
+            print("Writing mxm spectra at a time (artifical data)")
             #Write data one x/y chunk at a time (i.e., multiple z-chunks are writtent at once)
-            for xi in xrange( 0 , numChunksX ) :
+            for xi in range( 0 , numChunksX ) :
                 sys.stdout.write("[" +str( int( 100.* float(xi)/float(numChunksX) )) +"%]"+ "\r")
                 sys.stdout.flush()
                 xstart = xi*xchunk
                 xend = min(  xstart+xchunk , xdim)
-                for yi in xrange( 0 , numChunksY ) :
+                for yi in range( 0 , numChunksY ) :
                     ystart = yi*ychunk
                     yend = min( ystart+ychunk , ydim )
                     #Save the spectrum to the hdf5 file
@@ -263,32 +263,32 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
     
         else :
             #Write data one x/y/z chunk at a time
-            print "Writing one x/y/z chunk at a time (artifical data)"
-            for xt in xrange(0 , numChunksX) :
+            print("Writing one x/y/z chunk at a time (artifical data)")
+            for xt in range(0 , numChunksX) :
                 sys.stdout.write("[" +str( int( 100.* float(xt)/float(numChunksX) )) +"%]"+ "\r")
                 sys.stdout.flush()
                 xstart = xt*xchunk
                 xend = min(  xstart+xchunk , xdim)
-                for yt in xrange(0, numChunksY ) :
+                for yt in range(0, numChunksY ) :
                     ystart = yt*ychunk
                     yend = min( ystart+ychunk , ydim )
-                    for zt in xrange(0, numChunksZ ) :
+                    for zt in range(0, numChunksZ ) :
                         zstart = zt*zchunk
                         zend = min( zstart+zchunk , zdim )
                         data[xstart:xend , ystart:yend, zstart:zend ] =  (xt*ydim*zdim + yt*zdim  +zt)
 
     else :
-        print "Writing one x/y/z chunk at a time (donor dataset)"
+        print("Writing one x/y/z chunk at a time (donor dataset)")
         #Write data into all the chunks one x,y,z chunk at a time using the donor file
-        for xt in xrange(0, numChunksX ) :
+        for xt in range(0, numChunksX ) :
             sys.stdout.write("[" +str( int( 100.* float(xt)/float(numChunksX) )) +"%]"+ "\r")
             sys.stdout.flush()
             xstart = xt*xchunk
             xend = min(  xstart+xchunk , xdim)
-            for yt in xrange(0, numChunksY ) :
+            for yt in range(0, numChunksY ) :
                 ystart = yt*ychunk
                 yend = min( ystart+ychunk , ydim )
-                for zt in xrange(0, numChunksZ ) :
+                for zt in range(0, numChunksZ ) :
                     zstart = zt*zchunk
                     zend = min( zstart+zchunk , zdim )
                     #print "Write : "+str(xstart)+" "+str(xend)+" "+str(ystart)+" "+str(yend)+" "+str(zstart)+" "+str(zend)

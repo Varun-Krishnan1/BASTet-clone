@@ -88,7 +88,7 @@ class omsi_mz_rebin(analysis_base):
                 scipy_main_version = 0
 
         except ImportError:
-            print "This analysis requires package scipy.ndimage.  Install and try again."
+            print("This analysis requires package scipy.ndimage.  Install and try again.")
             raise AttributeError
 
         #unpack variables
@@ -101,10 +101,10 @@ class omsi_mz_rebin(analysis_base):
 
         # decide whether to use new_mzdata or new_spacing
         if new_mzdata.shape == (0,) and new_spacing == 0:
-            print "At least one of new_mzdata and new_spacing must be specified."
+            print("At least one of new_mzdata and new_spacing must be specified.")
             raise AttributeError
         elif new_mzdata.shape != (0,) and new_spacing != 0:
-            print "Only one of new_mzdata or new_spacing can be defined."
+            print("Only one of new_mzdata or new_spacing can be defined.")
             raise AttributeError
         elif new_mzdata.shape == (0,):       # if using new_spacing, form new_mzdata vector
             minmz = np.min(mzdata)
@@ -116,7 +116,7 @@ class omsi_mz_rebin(analysis_base):
 
         # map new bins to old bins; only done once per image, not per pixel
 
-        print 'Mapping new bins to old bins'
+        print('Mapping new bins to old bins')
         q = np.searchsorted(mzdata, new_mzdata)  # same shape as new_mz_data
                                                  # q[j] is index of mz_data at which to stop cumsum(mzdata) for bin j
 
@@ -150,7 +150,7 @@ class omsi_mz_rebin(analysis_base):
                     new_msidata[ix, iy, :] = \
                         ndi.filters.gaussian_filter(scan, sigma=filter_sigma)
                 if ix%10==0 and ix==iy:
-                    print 'Rebinning pixel %s of %s' % (ix*iy, npixel)
+                    print('Rebinning pixel %s of %s' % (ix*iy, npixel))
 
         #return variables
         return np.asarray(new_msidata), np.asarray(new_mzdata)
@@ -284,12 +284,12 @@ class omsi_mz_rebin(analysis_base):
         label_slice = None
 
         new_msidata_shape = analysis_object['new_msidata']
-        valuesX = range(0, new_msidata_shape[0])
+        valuesX = list(range(0, new_msidata_shape[0]))
         labelX = 'pixel index X'
-        valuesY = range(0, new_msidata_shape[1])
+        valuesY = list(range(0, new_msidata_shape[1]))
         labelY = 'pixel index Y'
         if len(new_msidata_shape) > 3:
-            valuesZ = range(0, new_msidata_shape[2])
+            valuesZ = list(range(0, new_msidata_shape[2]))
             labelZ = 'pixel index Z'
         else:
             valuesZ = None

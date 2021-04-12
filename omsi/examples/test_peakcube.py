@@ -43,7 +43,7 @@ def main(argv=None):
     numSlices = peakCube.shape[2]
 
     #Generate the images
-    print "Generating images"
+    print("Generating images")
     names = []
     for i in range(0,numSlices) :
         sys.stdout.write("[" +str( int( 100.* float(i)/float(numSlices) )) +"%]"+ "\r")
@@ -60,13 +60,13 @@ def main(argv=None):
         a.convert('L').save( name , 'PNG' )
 
     #Generate the latex file
-    print "Generating LaTeX file"
+    print("Generating LaTeX file")
 
     texFileName = outfileName+"summary.tex"
     latexFile = open( texFileName  , 'w' )
     latexFile.write("\documentclass[a4paper,10pt]{article}\n")
-    latexFile.write("\usepackage[utf8x]{inputenc}\n")
-    latexFile.write("\usepackage{graphicx}\n")
+    latexFile.write("\\usepackage[utf8x]{inputenc}\n")
+    latexFile.write("\\usepackage{graphicx}\n")
     latexFile.write("\\title{Peak Images}\n")
     latexFile.write("\\author{Oliver Ruebel}\n")
     latexFile.write("\date{"+str(datetime.date.today())+"}\n")
@@ -85,7 +85,7 @@ def main(argv=None):
             latexFile.write("\\begin{center}\n")
             latexFile.write("\\begin{tabular}{lll}\n")
 
-        for ci in xrange(0,numCols) :
+        for ci in range(0,numCols) :
             index = i*numCols+ci
             if index < peakMZ.size :
                 latexFile.write(str(peakMZ[index]))
@@ -96,7 +96,7 @@ def main(argv=None):
             else :
                 latexFile.write( " \\\\ \n")
 
-        for ci in xrange(0,numCols) :
+        for ci in range(0,numCols) :
             index = i*numCols+ci
             if index < len(names) :
                 latexFile.write("\includegraphics[width=0.3\\textwidth]{"+names[index]+"}")
@@ -115,19 +115,19 @@ def main(argv=None):
 
 def printHelp() :
 
-    print "USAGE: Call \"python peakCubeOverview.py HDF5File expIndex anaIndex outFile\" "
-    print ""
-    print "HDF5File : The OpenMSI HDF5 file to be used"
-    print "expIndex : The index of the experiment within the file"
-    print "anaIndex : The index of the analysis with the global peak finding results"
-    print "outFile : The basename (and path) for the output files"
-    print ""
-    print "Example usage:"
-    print "python peakCubeOverview.py /work2/bowen/2012_0403_KBL_platename_100212.h5 0 1 /work2/bowen/test_images/slice"
-    print ""
-    print "Output : "
-    print "1) One image for each m/z slice of the peak_cube data"
-    print "2) Latex file with a summary of all images. The latex file can be compiled to pdf using pdflatex."
+    print("USAGE: Call \"python peakCubeOverview.py HDF5File expIndex anaIndex outFile\" ")
+    print("")
+    print("HDF5File : The OpenMSI HDF5 file to be used")
+    print("expIndex : The index of the experiment within the file")
+    print("anaIndex : The index of the analysis with the global peak finding results")
+    print("outFile : The basename (and path) for the output files")
+    print("")
+    print("Example usage:")
+    print("python peakCubeOverview.py /work2/bowen/2012_0403_KBL_platename_100212.h5 0 1 /work2/bowen/test_images/slice")
+    print("")
+    print("Output : ")
+    print("1) One image for each m/z slice of the peak_cube data")
+    print("2) Latex file with a summary of all images. The latex file can be compiled to pdf using pdflatex.")
 
 if __name__ == "__main__":
     main()

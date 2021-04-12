@@ -94,7 +94,7 @@ def v_qspectrum(cls, analysis_object, x, y, viewer_option=0):
         if (check_selection_string(x) == selection_type['indexlist']) and (
             check_selection_string(y) == selection_type['indexlist']):
             if len(xList) == len(yList):
-                items = [(xList[i], yList[i]) for i in xrange(0, len(xList))]
+                items = [(xList[i], yList[i]) for i in range(0, len(xList))]
             else:
                 return None, None
         else:
@@ -111,7 +111,7 @@ def v_qspectrum(cls, analysis_object, x, y, viewer_option=0):
         #Initalize the data cube to be returned
         data = np.zeros((shapeX, shapeY, shapeZ), dtype=peak_values.dtype)
         #Fill the non-zero locations for the data cube with data
-        for ni in xrange(0, len(items)):
+        for ni in range(0, len(items)):
             currentIndex = (items[ni][0] * Ny + items[ni][1])
             currentDX = ni
             currentDY = 0
@@ -151,13 +151,13 @@ def v_qmz(cls, analysis_object, qslice_viewer_option=0, qspectrum_viewer_option=
     array_indices = analysis_object['peak_arrayindex'][:]
     x_size = array_indices[:, 0].max()+1
     y_size = array_indices[:, 1].max()+1
-    valuesX = range(0, x_size)
+    valuesX = list(range(0, x_size))
     labelX = 'pixel index X'
-    valuesY = range(0, y_size)
+    valuesY = list(range(0, y_size))
     labelY = 'pixel index Y'
     if array_indices.shape[1] > 2:
         z_size = array_indices[:, 2].max()+1
-        valuesZ = range(0, z_size)
+        valuesZ = list(range(0, z_size))
         labelZ = 'pixel index Z'
     else:
         valuesZ = None
@@ -211,10 +211,10 @@ def execute_analysis(self):
     Nx = msidata.shape[0]
     Ny = msidata.shape[1]
     Nz = msidata.shape[2]
-    print "Data shape: ", msidata.shape
-    print "[LPF]"
-    print "LPF Parameters:"
-    print "peakheight =", peakheight, "slwindow =", slwindow, "smoothwidth =", smoothwidth
+    print("Data shape: ", msidata.shape)
+    print("[LPF]")
+    print("LPF Parameters:")
+    print("peakheight =", peakheight, "slwindow =", slwindow, "smoothwidth =", smoothwidth)
     sys.stdout.flush()
 
     timebefore = time()  # timekeeping
@@ -239,13 +239,13 @@ def execute_analysis(self):
     cl_info = len(cl_info)
 
     # memory cap based on GPUs ammount
-    print "# of GPUs: ", cl_info
+    print("# of GPUs: ", cl_info)
     MEM_CAP = SET_MEM_CAP * cl_info * .90
 
     # x/y split due to gpu memory constraint
     xsplit = 1
     ysplit = Ny
-    for Nxi in xrange(1, Nx + 1):
+    for Nxi in range(1, Nx + 1):
         splitarr = np.empty([Nxi, Ny, Nz], dtype=NP_TYPE)
         if (splitarr.nbytes < MEM_CAP):
             xsplit = Nxi
@@ -254,20 +254,20 @@ def execute_analysis(self):
 
     if (xsplit == 1):
         ysplit = 1
-        for Nyi in xrange(1, Ny + 1):
+        for Nyi in range(1, Ny + 1):
             splitarr = np.empty([1, Nyi, Nz], dtype=NP_TYPE)
             if (splitarr.nbytes < MEM_CAP):
                 ysplit = Nyi
             else:
                 break
-        for Nyi in xrange(1, Ny + 1):
+        for Nyi in range(1, Ny + 1):
             ydiv = Ny / float(Nyi)
             ydiv = int(math.ceil(ydiv))
             if (ysplit >= ydiv):
                 ysplit = ydiv
                 break
 
-    print "xsplit: ", xsplit, " ysplit: ", ysplit
+    print("xsplit: ", xsplit, " ysplit: ", ysplit)
 
     xstart = ystart = 0
     xend = xamt = xsplit
@@ -278,9 +278,9 @@ def execute_analysis(self):
     ycount = Ny / float(ysplit)
     ycount = int(math.ceil(ycount))
 
-    for xc in xrange(xcount):
-        for yc in xrange(ycount):
-            print "#: ", pcount + 1, "/", xcount * ycount
+    for xc in range(xcount):
+        for yc in range(ycount):
+            print("#: ", pcount + 1, "/", xcount * ycount)
             sys.stdout.flush()
 
             # opencl gate
@@ -288,11 +288,11 @@ def execute_analysis(self):
                                                                           smoothwidth, slwindow, peakheight)
 
             # building peak structures
-            for x in xrange(xamt):
-                for y in xrange(yamt):
+            for x in range(xamt):
+                for y in range(yamt):
 
                     totindex = y + ((yend - ystart) * x)
-                    for t in xrange(cl_maxtabTot[totindex]):
+                    for t in range(cl_maxtabTot[totindex]):
                         peak_values.append(cl_maxtabVal[x, y, t])
                         peak_MZ.append(cl_maxtabPos[x, y, t])
 
@@ -323,16 +323,16 @@ def execute_analysis(self):
 
             pcount += 1
 
-    print "peak_arrayindex shape: ", np.array(peak_arrayindex).shape
-    print "peak_values: ", np.array(peak_values)
-    print "peak_values shape: ", np.array(peak_values).shape
-    print "peak_MZ: ", np.array(peak_MZ)
-    print "peak_MZ shape: ", np.array(peak_MZ).shape
+    print("peak_arrayindex shape: ", np.array(peak_arrayindex).shape)
+    print("peak_values: ", np.array(peak_values))
+    print("peak_values shape: ", np.array(peak_values).shape)
+    print("peak_MZ: ", np.array(peak_MZ))
+    print("peak_MZ shape: ", np.array(peak_MZ).shape)
 
     timetotal = time() - timebefore  # timekeeping
-    print "time (s): ", timetotal  # timekeeping
+    print("time (s): ", timetotal)  # timekeeping
 
-    print "Collecting data into HDF5..."
+    print("Collecting data into HDF5...")
 
     #Add the analysis results and parameters to the anlaysis data so that it can be accessed and written to file
     #We here convert the single scalars to 1D numpy arrays to ensure consistency. The data write function can
@@ -347,8 +347,8 @@ def execute_analysis(self):
     # self['LPF_Peaks_Vals'] = np.asarray( peak_values )
     # self['LPF_indata_mz'] = mzdata[:]
 
-    print "Collecting done."
-    print "--- finished ---"
+    print("Collecting done.")
+    print("--- finished ---")
 
 
 def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
@@ -372,11 +372,11 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
     xsize = []
     ysize = []
 
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         in_data.append(np.array(msidt2d[current_split:total_split, :], dtype=NP_TYPE))
         xsize.append(np.int32(in_data[d].shape[0]))
         ysize.append(np.int32(in_data[d].shape[1]))
-        print "sizes", d + 1, ":", xsize[d], ysize[d], "  ",
+        print("sizes", d + 1, ":", xsize[d], ysize[d], "  ", end=' ')
         current_split = total_split
         total_split += total_split
         if (total_split > msidt2d.shape[0]):
@@ -400,7 +400,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
     ctx = []
     queue = []
     prg = []
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         ctx.append(cl.Context(devices=[cl_dev[d]]))
         queue.append(cl.CommandQueue(ctx[d]))
         prg.append(cl.Program(ctx[d], fstr).build())
@@ -408,7 +408,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
     # ------------- opencl init [e] -------------
 
     # ------ smoothgaussian [s] ------
-    x = np.array(range(-3 * smoothsize, 3 * smoothsize))
+    x = np.array(list(range(-3 * smoothsize, 3 * smoothsize)))
     g = np.exp(-(x ** 2) / (2.0 * float(smoothsize) ** 2))
     g = g / g.sum()
     g = np.array(g, dtype=NP_TYPE)
@@ -420,7 +420,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
     output_buf = []
     global_size = []
     local_size = None
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         input_buf.append(cl.Buffer(ctx[d], mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=in_data[d]))
         g_buf.append(cl.Buffer(ctx[d], mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=g))
         output_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, in_data[d].nbytes))
@@ -432,7 +432,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
                           output_buf[d])
         prg[d].clSmoothed(queue[d], global_size[d], local_size, *(kernelargs))
 
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         queue[d].finish()
 
         cl.enqueue_copy(queue[d], in_data[d], output_buf[d])
@@ -442,7 +442,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
         output_buf[d].release()
 
     # ------ smoothgaussian [e] ------
-    print "\nsmooth - done // ",
+    print("\nsmooth - done // ", end=' ')
     sys.stdout.flush()
     # ------ sliding window [s] ------
     slwindow = np.int32(slwindow)
@@ -453,7 +453,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
     index_buf = []
     output_buf = []
 
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         dummyVal = np.empty_like(in_data[d][:, 0:SLWMIN_ARR_SIZE], dtype=NP_TYPE)
         dummyPos = np.empty_like(dummyVal, dtype=np.int32)
 
@@ -471,7 +471,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
 
         prg[d].clSliding_window_minimum(queue[d], global_size[d], local_size, *(kernelargs))
 
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         queue[d].finish()
 
         cl_slmin = np.empty_like(in_data[d])
@@ -485,7 +485,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
         output_buf[d].release()
 
     # ------ sliding window [e] ------
-    print "sliding - done // ",
+    print("sliding - done // ", end=' ')
     sys.stdout.flush()
     # --------- peakdet [s] ----------
 
@@ -508,7 +508,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
     cl_mintabPos = []
     cl_mintabTot = []
 
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         dummyVal = np.empty_like(in_data[d][:, 0:my_size_limit], dtype=NP_TYPE)
         dummyPos = np.empty_like(dummyVal, dtype=np.int32)
         dummyTot = np.array(dummyVal[:, 0], dtype=np.int32)
@@ -537,7 +537,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
         cl_mintabPos.append(np.empty_like(dummyPos))
         cl_mintabTot.append(np.empty_like(dummyTot))
 
-    for d in xrange(dev_amt):
+    for d in range(dev_amt):
         queue[d].finish()
 
         cl.enqueue_copy(queue[d], cl_maxtabVal[d], maxtabVal_buf[d])
@@ -556,7 +556,7 @@ def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
         mintabTot_buf[d].release()
 
     # --------- peakdet [e] ----------
-    print "peakdet - done"
+    print("peakdet - done")
     sys.stdout.flush()
 
     cl_maxtabVal = np.concatenate(cl_maxtabVal[:])
@@ -578,8 +578,8 @@ def main(argv=None):
 
         # Check for correct usage
     if len(argv) < 2:
-        print "USAGE: Call \"omsi_lpf OMSI_FILE [expIndex dataIndex peakHeight]	\" "
-        print "Local peakfinding using opencl"
+        print("USAGE: Call \"omsi_lpf OMSI_FILE [expIndex dataIndex peakHeight]	\" ")
+        print("Local peakfinding using opencl")
         exit(0)
 
     #Read the input arguments
@@ -603,10 +603,10 @@ def main(argv=None):
     try:
         omsiFile = omsi_file(omsiInFile, 'a')
     except:
-        print "Unexpected openeing the input file:", sys.exc_info()[0]
+        print("Unexpected openeing the input file:", sys.exc_info()[0])
         exit(0)
 
-    print "Input file: ", omsiInFile
+    print("Input file: ", omsiInFile)
 
     #Get the experiment and dataset
     exp = omsiFile.get_experiment(expIndex)
@@ -615,22 +615,22 @@ def main(argv=None):
 
     #Execute the peak finding
     myLPF = omsi_lpf(name_key="omsi_lpf_" + str(ctime()))
-    print "--- Executing LPF ---"
+    print("--- Executing LPF ---")
     myLPF.execute(data, mzdata, peakheight=mypeakheight)
-    print "\n\nGetting peak finding analysis results"
+    print("\n\nGetting peak finding analysis results")
     pmz = myLPF['LPF_Peaks_MZ']
-    print "pmz:\n", pmz
+    print("pmz:\n", pmz)
     pv = myLPF['LPF_Peaks_Vals']
-    print "pv:\n", pv
+    print("pv:\n", pv)
     pai = myLPF['LPF_Peaks_ArrayIndex']
-    print "pai:\n", pai
+    print("pai:\n", pai)
 
-    print "\nsaving HDF5 analysis..."
+    print("\nsaving HDF5 analysis...")
     analysis, analysisindex = exp.create_analysis(myLPF)
-    print "done!"
+    print("done!")
 
-    print "lpf analysis index:", analysisindex
-    print "omsi_lpf complete for input file: ", omsiInFile, "\n"
+    print("lpf analysis index:", analysisindex)
+    print("omsi_lpf complete for input file: ", omsiInFile, "\n")
 
 
 if __name__ == "__main__":

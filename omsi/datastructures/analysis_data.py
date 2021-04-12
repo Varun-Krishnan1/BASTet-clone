@@ -28,11 +28,11 @@ class data_dtypes(dict):
         """
         dtypes = {'int': int,
                   'float': float,
-                  'long': long,
+                  'long': int,
                   'complex': complex,
                   'bool': data_dtypes.bool_type,
                   'str': str,
-                  'unicode': unicode,
+                  'unicode': str,
                   'ndarray': data_dtypes.ndarray}
         return dtypes
 
@@ -69,7 +69,7 @@ class data_dtypes(dict):
         from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
         from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
         from omsi.dataformat.omsi_file.common import omsi_file_common
-        if isinstance(argument, basestring):
+        if isinstance(argument, str):
             try:
                 return np.asarray(ast.literal_eval(argument))
             except (ValueError, SyntaxError):
@@ -257,15 +257,15 @@ class parameter_data(dict):
         """
         if key in self.default_keys:
             if key == 'group' and value is not None:
-                if not isinstance(value, basestring) and not isinstance(value, dict):
+                if not isinstance(value, str) and not isinstance(value, dict):
                     raise ValueError('Invalid group description for omsi_analysis_parameter')
                 if isinstance(value, dict) and 'name' not in value:
                     raise ValueError('Invalid group description for omsi_analysis_parameter')
             dict.__setitem__(self, key, value)
         else:
-            raise KeyError(unicode(key) +
+            raise KeyError(str(key) +
                            " not in the list of allowed keys. Allowed keys are: " +
-                           unicode(self.default_keys))
+                           str(self.default_keys))
 
     def copy(self):
         """
@@ -333,10 +333,10 @@ class parameter_data(dict):
             This should never be the case if the object was created properly.
         """
         get_data = True  # Should we get the 'data' (True) or 'default' key (False)
-        if 'data' in self.keys():
-            if 'default' in self.keys() and self['default'] is not None and self['data'] is None:
+        if 'data' in list(self.keys()):
+            if 'default' in list(self.keys()) and self['default'] is not None and self['data'] is None:
                 get_data = False
-        elif 'default' in self.keys():
+        elif 'default' in list(self.keys()):
             get_data = False
         else:
             raise KeyError('No data or default setting available for the parameter ' + self['name'])
@@ -354,7 +354,7 @@ class parameter_data(dict):
 
         # Convert the data to the proper type if needed
         # Convert the data to a scalar type if needed
-        scalar_types = [int, float, long, complex, bool, str, unicode]
+        scalar_types = [int, float, int, complex, bool, str, str]
         if self['dtype'] in scalar_types:
             curr_dtype = scalar_types[scalar_types.index(self['dtype'])]
             try:
@@ -362,11 +362,11 @@ class parameter_data(dict):
             except:
                 try:
                     warnings.warn('Conversion of parameter data to the expected dtype failed. ' +
-                                  self['name'] + "  " + unicode(outdata) + "  " +
-                                  unicode(self['dtype']) + "  " + unicode(sys.exc_info()))
+                                  self['name'] + "  " + str(outdata) + "  " +
+                                  str(self['dtype']) + "  " + str(sys.exc_info()))
                 except (UnicodeDecodeError, UnicodeEncodeError):
                     warnings.warn('Conversion of parameter data to the expected dtype failed. ' + self['name']
-                                  + "  " + unicode(self['dtype']) + "  " + unicode(sys.exc_info()))
+                                  + "  " + str(self['dtype']) + "  " + str(sys.exc_info()))
 
         # Convert to ndarray if needed
         try:
@@ -421,7 +421,7 @@ class parameter_manager(object):
         :param item:
         :return: Output of self.analysis_tasks.__getitem__ implemented by omsi.workflow.common
         """
-        if isinstance(item, basestring):
+        if isinstance(item, str):
             for param in self.parameters:
                 if param['name'] == item:
                     return param.get_data_or_default()
@@ -443,7 +443,7 @@ class parameter_manager(object):
         """
         # Check if we have a valid key
         param_set = False
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             for param in self.parameters:
                 if param['name'] == key:
                     log_helper.debug(__name__, "Setting parameter " + key)
@@ -483,7 +483,7 @@ class parameter_manager(object):
 
         :raises: IndexError is raised when the index is out of bounds
         """
-        if isinstance(index, basestring):
+        if isinstance(index, str):
             return self.get_parameter_data_by_name(index)
         else:
             return self.get_all_parameter_data()[index]
@@ -551,7 +551,7 @@ class parameter_manager(object):
     def add_parameter(self,
                       name,
                       help,
-                      dtype=unicode,
+                      dtype=str,
                       required=False,
                       default=None,
                       choices=None,
@@ -575,7 +575,7 @@ class parameter_manager(object):
         """
         log_helper.debug(__name__, "Add parameter " + str(name))
         if self.get_parameter_data_by_name(name) is not None:
-            raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
+            raise ValueError('A parameter with the name ' + str(name) + " already exists.")
         self.parameters.append(parameter_data(name=name,
                                               help=help,
                                               dtype=dtype,

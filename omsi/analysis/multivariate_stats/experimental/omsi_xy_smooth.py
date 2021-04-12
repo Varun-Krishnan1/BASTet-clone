@@ -72,7 +72,7 @@ class omsi_xy_smooth(analysis_base):
         try:
             import scipy.ndimage as ndi
         except ImportError:
-            print "This analysis requires package scipy.ndimage.  Install and try again."
+            print("This analysis requires package scipy.ndimage.  Install and try again.")
             raise AttributeError
 
         #unpack variables

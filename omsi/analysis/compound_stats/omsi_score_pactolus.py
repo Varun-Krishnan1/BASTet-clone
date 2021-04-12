@@ -81,7 +81,7 @@ class omsi_score_pactolus(analysis_base):
                            help='Scheduling to be used for parallel MPI runs',
                            dtype=str,
                            required=False,
-                           choices=mpi_helper.parallel_over_axes.SCHEDULES.values(),
+                           choices=list(mpi_helper.parallel_over_axes.SCHEDULES.values()),
                            group=groups['parallel'],
                            default=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
         self.add_parameter(name='collect',
@@ -297,7 +297,7 @@ class omsi_score_pactolus(analysis_base):
             time_str += " : num hits : " + str((current_hits > 0).sum())
             #log_helper.info(__name__, time_str, comm=self.mpi_comm, root=None)
             #sys.stdout.flush()
-            print time_str
+            print(time_str)
             sys.stdout.flush()
 
             # Save the hits for the current pixel
@@ -332,7 +332,7 @@ class omsi_score_pactolus(analysis_base):
             score = np.asarray(hit_matrix)
 
         # Return the hit_table and the index of the pixel each hit_table applies to
-        print "rank : " + str(mpi_helper.get_rank()) + " : scores " + str(score)
+        print("rank : " + str(mpi_helper.get_rank()) + " : scores " + str(score))
         sys.stdout.flush()
         return np.asarray(pixel_index), \
                np.asarray(score), \

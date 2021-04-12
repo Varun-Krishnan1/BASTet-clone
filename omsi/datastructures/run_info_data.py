@@ -31,7 +31,7 @@ except ImportError:
     PROFILE_MEMORY_AVAILABLE = False
 
 try:
-    import StringIO
+    import io
 except ImportError:
     PROFILE_AVAILABLE = False
     PROFILE_MEMORY_AVAILABLE = False
@@ -208,26 +208,26 @@ class run_info_dict(dict):
         log_helper.debug(__name__, 'Recording pre-execution runtime data', root=self.mpi_root, comm=self.mpi_comm)
         # Record basic runtime environment information using the platform module
         try:
-            self['architecture'] = unicode(platform.architecture())
-            self['java_ver'] = unicode(platform.java_ver())
-            self['libc_ver'] = unicode(platform.libc_ver())
-            self['linux_distribution'] = unicode(platform.linux_distribution())
-            self['mac_ver'] = unicode(platform.mac_ver())
-            self['machine'] = unicode(platform.machine())
-            self['node'] = unicode(platform.node())
-            self['platform'] = unicode(platform.platform())
-            self['processor'] = unicode(platform.processor())
-            self['python_branch'] = unicode(platform.python_branch())
-            self['python_build'] = unicode(platform.python_build())
-            self['python_compiler'] = unicode(platform.python_compiler())
-            self['python_implementation'] = unicode(platform.python_implementation())
-            self['python_revision'] = unicode(platform.python_revision())
-            self['python_version'] = unicode(platform.python_version())
-            self['release'] = unicode(platform.release())
-            self['system'] = unicode(platform.system())
-            self['uname'] = unicode(platform.uname())
-            self['version'] = unicode(platform.version())
-            self['win32_ver'] = unicode(platform.win32_ver())
+            self['architecture'] = str(platform.architecture())
+            self['java_ver'] = str(platform.java_ver())
+            self['libc_ver'] = str(platform.libc_ver())
+            self['linux_distribution'] = str(platform.linux_distribution())
+            self['mac_ver'] = str(platform.mac_ver())
+            self['machine'] = str(platform.machine())
+            self['node'] = str(platform.node())
+            self['platform'] = str(platform.platform())
+            self['processor'] = str(platform.processor())
+            self['python_branch'] = str(platform.python_branch())
+            self['python_build'] = str(platform.python_build())
+            self['python_compiler'] = str(platform.python_compiler())
+            self['python_implementation'] = str(platform.python_implementation())
+            self['python_revision'] = str(platform.python_revision())
+            self['python_version'] = str(platform.python_version())
+            self['release'] = str(platform.release())
+            self['system'] = str(platform.system())
+            self['uname'] = str(platform.uname())
+            self['version'] = str(platform.version())
+            self['win32_ver'] = str(platform.win32_ver())
         except:
             warnings.warn("WARNING: Recording of platform provenance failed: " + str(sys.exc_info()))
 
@@ -244,9 +244,9 @@ class run_info_dict(dict):
         # Attempt to record software library version
         try:
             import numpy as np
-            self['numpy_version_full_version'] = unicode(np.version.full_version)
-            self['numpy_version_release'] = unicode(np.version.release)
-            self['numpy_version_git_revision'] = unicode(np.version.git_revision)
+            self['numpy_version_full_version'] = str(np.version.full_version)
+            self['numpy_version_release'] = str(np.version.release)
+            self['numpy_version_git_revision'] = str(np.version.git_revision)
         except ImportError:
             log_helper.warning(__name__, 'Recording of numpy version not possible.',
                                root=self.mpi_root, comm=self.mpi_comm)
@@ -254,11 +254,11 @@ class run_info_dict(dict):
         # Attempt to record psutil data
         try:
             import psutil
-            self['logical_cpu_count'] = unicode(psutil.cpu_count())
-            self['cpu_count'] = unicode(psutil.cpu_count(logical=False))
+            self['logical_cpu_count'] = str(psutil.cpu_count())
+            self['cpu_count'] = str(psutil.cpu_count(logical=False))
             process = psutil.Process()
-            self['open_files'] = unicode(process.open_files())
-            self['memory_info_before'] = unicode(process.memory_info())
+            self['open_files'] = str(process.open_files())
+            self['memory_info_before'] = str(process.memory_info())
         except ImportError:
             log_helper.warning(__name__, 'psutil not installed. Recording of part of runtime information not possible',
                                root=self.mpi_root, comm=self.mpi_comm)
@@ -266,7 +266,7 @@ class run_info_dict(dict):
             warnings.warn("Recording of psutil-based runtime information failed: "+str(sys.exc_info()))
 
         # Record the start time for the analysis
-        self['start_time'] = unicode(datetime.datetime.now())
+        self['start_time'] = str(datetime.datetime.now())
 
         # Enable time and usage profiling if requested
         if self.__profile_time_and_usage:
@@ -295,20 +295,20 @@ class run_info_dict(dict):
         """
         log_helper.debug(__name__, 'Recording post-execution runtime data', root=self.mpi_root, comm=self.mpi_comm)
         # Finalize recording of post execution provenance
-        self['end_time'] = unicode(datetime.datetime.now())
+        self['end_time'] = str(datetime.datetime.now())
         if execution_time is not None:
-            self['execution_time'] = unicode(execution_time)
+            self['execution_time'] = str(execution_time)
         elif 'start_time' in self:
             start_time = run_info_dict.string_to_time(self['start_time'])
             stop_time = run_info_dict.string_to_time(self['end_time'])
-            self['execution_time'] = unicode(stop_time - start_time)    # TODO: This only gives execution time in full seconds right now
+            self['execution_time'] = str(stop_time - start_time)    # TODO: This only gives execution time in full seconds right now
         else:
             self['execution_time'] = None
         # Attempt to record psutil data
         try:
             import psutil
             process = psutil.Process()
-            self['memory_info_after'] = unicode(process.memory_info())
+            self['memory_info_after'] = str(process.memory_info())
         except ImportError:
             log_helper.warning(__name__, 'psutil not installed. Recording of part of runtime information not possible',
                                root=self.mpi_root, comm=self.mpi_comm)
@@ -319,9 +319,9 @@ class run_info_dict(dict):
         if self.__time_and_use_profiler is not None:
             self.__time_and_use_profiler.disable()
             self.__time_and_use_profiler.create_stats()
-            self['profile'] = unicode(self.__time_and_use_profiler.stats)
+            self['profile'] = str(self.__time_and_use_profiler.stats)
             # Save the summary statistics for the profiling data
-            stats_io = StringIO.StringIO()
+            stats_io = io.StringIO()
             profiler_stats = pstats.Stats(self.__time_and_use_profiler, stream=stats_io).sort_stats('cumulative')
             profiler_stats.print_stats()
             self['profile_stats'] = stats_io.getvalue()
@@ -329,9 +329,9 @@ class run_info_dict(dict):
         # Record the memory profiling data if possible
         if self.__memory_profiler is not None and self.get_profile_memory():
             log_helper.debug(__name__, 'Recording memory profiling data', root=self.mpi_root, comm=self.mpi_comm)
-            mem_stats_io = StringIO.StringIO()
+            mem_stats_io = io.StringIO()
             memory_profiler.show_results(self.__memory_profiler, stream=mem_stats_io)
-            self['profile_mem'] = unicode(self.__memory_profiler.code_map)
+            self['profile_mem'] = str(self.__memory_profiler.code_map)
             self['profile_mem_stats'] = mem_stats_io.getvalue()
 
     def clean_up(self):
@@ -349,7 +349,7 @@ class run_info_dict(dict):
         """
         log_helper.debug(__name__, 'Clean up runtime data', root=self.mpi_root, comm=self.mpi_comm)
         # Remove empty items from the run_info dict
-        for ri_key, ri_value in self.items():
+        for ri_key, ri_value in list(self.items()):
             try:
                 if ri_value is None or len(ri_value) == 0:
                     self.pop(ri_key)

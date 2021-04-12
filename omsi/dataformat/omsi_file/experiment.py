@@ -85,7 +85,7 @@ class omsi_experiment_manager(omsi_file_object_manager):
                   the experiment does not exist.
         """
         if exp_index < self.get_num_experiments():
-            experiment_name = unicode(omsi_format_experiment.exp_groupname + str(exp_index))
+            experiment_name = str(omsi_format_experiment.exp_groupname + str(exp_index))
             return omsi_file_experiment(self.experiment_parent[experiment_name])
         else:
             return None
@@ -100,7 +100,7 @@ class omsi_experiment_manager(omsi_file_object_manager):
         :returns: Returns h5py object of the experiment group or None in case the experiment is not found.
         """
         # Iterate through all groups of the root folder
-        for root_item in self.experiment_parent.items():
+        for root_item in list(self.experiment_parent.items()):
             if root_item[0].startswith(omsi_format_experiment.exp_groupname):
                 cur_exp_id = omsi_file_experiment(self.experiment_parent[root_item[0]]).get_experiment_identifier()
                 if cur_exp_id is not None:
@@ -163,7 +163,7 @@ class omsi_file_experiment(omsi_methods_manager,
         experiment_name = omsi_format_experiment.exp_groupname + str(experiment_index)
         # Using require_group ensures that the group is not overwritten if it
         # already exists
-        if experiment_name in parent_group.keys():
+        if experiment_name in list(parent_group.keys()):
             raise IndexError("The experiment with the given index already exists")
         experiment_group = parent_group.require_group(experiment_name)
         experiment_group.attrs[omsi_format_common.type_attribute] = "omsi_file_experiment"
@@ -191,7 +191,7 @@ class omsi_file_experiment(omsi_methods_manager,
         :type experiment_identifier: string or None. If None then 'undefined' will be used.
         :return:
         """
-        experiment_identifier_dataset = experiment_group.require_dataset(name=unicode(
+        experiment_identifier_dataset = experiment_group.require_dataset(name=str(
             omsi_format_experiment.exp_identifier_name), shape=(1,), dtype=omsi_format_common.str_type)
         if experiment_identifier is not None:
             if omsi_format_common.str_type_unicode:
@@ -232,7 +232,7 @@ class omsi_file_experiment(omsi_methods_manager,
         :returns: h5py object of the experiment identifier or None in case not present
         """
         try:
-            return self.managed_group[unicode(omsi_format_experiment.exp_identifier_name)]
+            return self.managed_group[str(omsi_format_experiment.exp_identifier_name)]
         except KeyError:
             return None
 
@@ -246,7 +246,7 @@ class omsi_file_experiment(omsi_methods_manager,
         expid = self.get_experiment_identifier()
         # Create the dataset for the id name if it does not exist
         if expid is None:
-            expid = self.managed_group.require_dataset(name=unicode(
+            expid = self.managed_group.require_dataset(name=str(
                 omsi_format_experiment.exp_identifier_name), shape=(1,), dtype=omsi_format_common.str_type)
 
         if omsi_format_common.str_type_unicode:

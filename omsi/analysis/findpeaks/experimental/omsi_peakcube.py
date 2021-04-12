@@ -62,7 +62,7 @@ class omsi_peakcube(analysis_base):
                 data = dataset[:, :, z_select]
                 return data
             except:
-                print "Global peak selection failed"
+                print("Global peak selection failed")
                 return None
         elif viewer_option >= 0:
             return super(omsi_peakcube, cls).v_qslice(analysis_object, z, viewer_option - 1)
@@ -106,12 +106,12 @@ class omsi_peakcube(analysis_base):
         mzSlice = None
         labelSlice = None
         peak_cube_shape = analysis_object['npg_peak_cube_mz'].shape
-        valuesX = range(0, peak_cube_shape[0])
+        valuesX = list(range(0, peak_cube_shape[0]))
         labelX = 'pixel index X'
-        valuesY = range(0, peak_cube_shape[1])
+        valuesY = list(range(0, peak_cube_shape[1]))
         labelY = 'pixel index Y'
         if len(peak_cube_shape) > 3:
-            valuesZ = range(0, peak_cube_shape[2])
+            valuesZ = list(range(0, peak_cube_shape[2]))
             labelZ = 'pixel index Z'
         else:
             valuesZ = None
@@ -158,7 +158,7 @@ class omsi_peakcube(analysis_base):
     # main PeakCube function
     # omsi_peakcube_exec(self, peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, HCpeaksLabels, HCLabelsList, npgdata_dependency = None, lpfdata_dependency = None):
     def execute_analysis(self):
-        print "Generating the peak cube..."
+        print("Generating the peak cube...")
 
         #Copy parameters to local variables for convenience
         peaksBins = self['peaksBins']
@@ -169,12 +169,12 @@ class omsi_peakcube(analysis_base):
         HCLabelsList = self['HCLabelsList']
 
         myPeakCube = self.getPeakCube(peaksIntensities, peaksArrayIndex, HCpeaksLabels, HCLabelsList)
-        print "\ndone!"
-        print "Calculating global m\z..."
+        print("\ndone!")
+        print("Calculating global m\z...")
         myGlobalMz = self.getGlobalMz(peaksBins, peaksMZdata, HCpeaksLabels, HCLabelsList)
-        print "\ndone!"
+        print("\ndone!")
 
-        print "Collecting data into HDF5..."
+        print("Collecting data into HDF5...")
 
         #Add the analysis results and parameters to the anlaysis data so that it can be accessed and written to file
         #We here convert the single scalars to 1D numpy arrays to ensure consistency. The data write function can
@@ -208,8 +208,8 @@ class omsi_peakcube(analysis_base):
         #			self.add_dependency_data( dependency_dict( param_name = 'peaksIntensities', link_name='peaksIntensities', omsi_object=lpfdata_dependency['LPF_Peaks_Vals'], selection=None ) )
         #			self.add_dependency_data( dependency_dict( param_name = 'peaksArrayIndex', link_name='peaksArrayIndex', omsi_object=lpfdata_dependency['LPF_Peaks_ArrayIndex'], selection=None ) )
 
-        print "Collecting done."
-        print "--- finished ---"
+        print("Collecting done.")
+        print("--- finished ---")
         return self['npg_peak_cube_mz'], self['npg_peak_mz']
 
     def record_execute_analysis_outputs(self, analysis_output):
@@ -228,11 +228,11 @@ class omsi_peakcube(analysis_base):
 
         percentcheck = None
         timekeep1 = time()
-        for iNxy in xrange(Nx * Ny):
+        for iNxy in range(Nx * Ny):
             percent = int(100. * float(iNxy + 1) / float(Nx * Ny))
             if (percent != percentcheck):
                 timer = int(time() - timekeep1)
-                print "[", percent, "% -", timer, "s ]\r",
+                print("[", percent, "% -", timer, "s ]\r", end=' ')
                 sys.stdout.flush()
                 percentcheck = percent
 
@@ -262,7 +262,7 @@ class omsi_peakcube(analysis_base):
                     srtInts = currentInts[sidxs]
 
                     prevLbl = None
-                    for iLbl in xrange(len(currentLbls)):
+                    for iLbl in range(len(currentLbls)):
                         thisLbl = srtLbls[iLbl]
                         thisInt = srtInts[iLbl]
                         myIdx = int(thisLbl - 1)
@@ -291,7 +291,7 @@ class omsi_peakcube(analysis_base):
         idxLeft = 0
 
         percentcheck = None
-        for i in xrange(len(HCLabelsList)):
+        for i in range(len(HCLabelsList)):
             currentlabel = HCLabelsList[i]
 
             idxRight = bisect.bisect_right(SortedPL, currentlabel)
@@ -318,8 +318,8 @@ def main(argv=None):
 
         # Check for correct usage
     if len(argv) != 6:
-        print "USAGE: Call \"omsi_peakcube OMSI_FILE [expIndex dataIndex LPFanalysisIndex NPGanalysisIndex]   \" "
-        print "Generates PeakCube for NPG global peaks"
+        print("USAGE: Call \"omsi_peakcube OMSI_FILE [expIndex dataIndex LPFanalysisIndex NPGanalysisIndex]   \" ")
+        print("Generates PeakCube for NPG global peaks")
         exit(0)
 
     #Read the input arguments
@@ -333,12 +333,12 @@ def main(argv=None):
     try:
         omsiFile = omsi_file(omsiInFile)
     except:
-        print "Error opening input file:", sys.exc_info()[0]
+        print("Error opening input file:", sys.exc_info()[0])
         exit(0)
 
-    print "Input file: ", omsiInFile
-    print "LPF Analysis Index: ", LPFanalysisIndex
-    print "NPG Analysis Index: ", NPGanalysisIndex
+    print("Input file: ", omsiInFile)
+    print("LPF Analysis Index: ", LPFanalysisIndex)
+    print("NPG Analysis Index: ", NPGanalysisIndex)
 
     #Get the experiment and data
     exp = omsiFile.get_experiment(expIndex)
@@ -348,25 +348,25 @@ def main(argv=None):
     LPFanalysis = exp.get_analysis(LPFanalysisIndex)
     NPGanalysis = exp.get_analysis(NPGanalysisIndex)
 
-    print "\n[loading data...]"
+    print("\n[loading data...]")
     peaksBins = LPFanalysis['LPF_Peaks_MZ'][:]
     peaksIntensities = LPFanalysis['LPF_Peaks_Vals'][:]
     peaksArrayIndex = LPFanalysis['LPF_Peaks_ArrayIndex'][:]
     NPGPL = NPGanalysis['npghc_peaks_labels'][:]
     NPGLL = NPGanalysis['npghc_labels_list'][:]
 
-    print "[done!] lpf data shapes:"
-    print "peaksBins shape: ", peaksBins.shape
-    print "peaksIntensities shape: ", peaksIntensities.shape
-    print "peaksArrayIndex shape: ", peaksArrayIndex.shape
-    print "peaksMZdata shape: ", peaksMZdata.shape
-    print "NPGPL shape: ", NPGPL.shape
-    print "NPGLL shape: ", NPGLL.shape
+    print("[done!] lpf data shapes:")
+    print("peaksBins shape: ", peaksBins.shape)
+    print("peaksIntensities shape: ", peaksIntensities.shape)
+    print("peaksArrayIndex shape: ", peaksArrayIndex.shape)
+    print("peaksMZdata shape: ", peaksMZdata.shape)
+    print("NPGPL shape: ", NPGPL.shape)
+    print("NPGLL shape: ", NPGLL.shape)
     sys.stdout.flush()
 
     # pc
     myPC = omsi_peakcube(name_key="omsi_peakcube_" + str(ctime()))
-    print "--- Creating Peak Cube ---"
+    print("--- Creating Peak Cube ---")
     #myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPL, NPGLL)
     myPC.execute(peaksBins=peaksBins,
                  peaksIntensities=peaksIntensities,
@@ -376,21 +376,21 @@ def main(argv=None):
                  HCLabelsList=NPGLL)
 
     PCm = myPC['npg_peak_cube_mz']
-    print "NPG Peak Cube Mzs: \n", PCm.shape, "\n", PCm
+    print("NPG Peak Cube Mzs: \n", PCm.shape, "\n", PCm)
     PMz = myPC['npg_peak_mz']
-    print "NPG Peak Mz: \n", PMz.shape, "\n", PMz
+    print("NPG Peak Mz: \n", PMz.shape, "\n", PMz)
 
-    print "\nsaving HDF5 analysis..."
+    print("\nsaving HDF5 analysis...")
     PCanalysis, PCanalysisindex = exp.create_analysis(myPC)
-    print "done!"
-    print "--- omsi_peakcube complete ---\n"
-    print "Peak Cube analysis index:", PCanalysisindex
-    print "omsi_peakcube complete for input file: ", omsiInFile, "\n"
+    print("done!")
+    print("--- omsi_peakcube complete ---\n")
+    print("Peak Cube analysis index:", PCanalysisindex)
+    print("omsi_peakcube complete for input file: ", omsiInFile, "\n")
 
 
 # stop python, used for debugging
 def stop():
-    raw_input("Stop!")
+    input("Stop!")
 
 
 if __name__ == "__main__":

@@ -313,12 +313,12 @@ class omsi_cx(analysis_base):
                                                load_parameters=False,
                                                load_runtime_data=False)
         cx_msidata_shape = cx_analysis_object['msidata'].shape
-        valuesX = range(0, cx_msidata_shape[0])
+        valuesX = list(range(0, cx_msidata_shape[0]))
         labelX = 'pixel index X'
-        valuesY = range(0, cx_msidata_shape[1])
+        valuesY = list(range(0, cx_msidata_shape[1]))
         labelY = 'pixel index Y'
         if len(cx_msidata_shape) > 3:
-            valuesZ = range(0, cx_msidata_shape[2])
+            valuesZ = list(range(0, cx_msidata_shape[2]))
             labelZ = 'pixel index Z'
         else:
             valuesZ = None

@@ -20,7 +20,7 @@ class omsi_format_common(object):
         super(omsi_format_common, self).__init__()
 
     try:
-        str_type = h5py.special_dtype(vlen=unicode)
+        str_type = h5py.special_dtype(vlen=str)
         str_type_unicode = True
     except NotImplementedError:
         str_type = h5py.special_dtype(vlen=str)

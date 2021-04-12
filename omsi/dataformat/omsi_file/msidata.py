@@ -72,15 +72,17 @@ class omsi_msidata_manager(omsi_file_object_manager):
                  with given index does not exist or the access failed for any
                  other reason.
         """
-        msidata_name = unicode(omsi_format_msidata.data_groupname + str(data_index))
-        try:
-            return omsi_file_msidata(self.msidata_parent[msidata_name],
-                                     fill_space=fill_space,
-                                     fill_spectra=fill_spectra,
-                                     preload_mz=preload_mz,
-                                     preload_xy_index=preload_xy_index)
-        except KeyError:
-            return None
+        msidata_name = str(omsi_format_msidata.data_groupname + str(data_index))
+        # print(msidata_name)
+        # print(self.msidata_parent[msidata_name])
+        #try:
+        return omsi_file_msidata(self.msidata_parent[msidata_name],
+                                 fill_space=fill_space,
+                                 fill_spectra=fill_spectra,
+                                 preload_mz=preload_mz,
+                                 preload_xy_index=preload_xy_index)
+        #except KeyError:
+            #return None
 
     def get_msidata_by_name(self, data_name):
         """
@@ -92,7 +94,7 @@ class omsi_msidata_manager(omsi_file_object_manager):
         :returns: h5py object of the dataset or None in case the dataset is not found.
         """
         # Iterate through all items of the experiment
-        for item_obj in self.msidata_parent.items():
+        for item_obj in list(self.msidata_parent.items()):
             if item_obj[0] == data_name:
                 return self.msidata_parent[item_obj[0]]
         return None
@@ -416,11 +418,11 @@ class omsi_file_msidata(omsi_dependencies_manager,
         # self.name = self.managed_group.name
         # self.methods_parent = self.managed_group
         # self.instrument_parent = self.managed_group
-        # self.dependencies = ...
         self.shape = []
         self.dtype = None  # Which datatype does the main MSI data have
+        # print("->" + str(self.managed_group.get(str(omsi_format_msidata.format_name))[0]))
         self.format_type = omsi_format_msidata.format_types[
-            str(self.managed_group .get(unicode(omsi_format_msidata.format_name))[0])]
+            str(self.managed_group.get(str(omsi_format_msidata.format_name))[0], encoding='utf-8')]
         self.datasets = []
         self.mz = None
         self.xy_index = None
@@ -432,35 +434,35 @@ class omsi_file_msidata(omsi_dependencies_manager,
         self.is_valid = False
         if self.format_type is not None:
             # Initalize the dataset
-            self.datasets = [self.managed_group[unicode(x[0])] for x in self.managed_group.items()
+            self.datasets = [self.managed_group[str(x[0])] for x in list(self.managed_group.items())
                              if x[0].startswith(omsi_format_msidata.dataset_name)]
             self.dtype = self.datasets[0].dtype
             # Initalize the mz data
             if preload_mz:
-                self.mz = self.managed_group[unicode(omsi_format_msidata.mzdata_name)][:]
+                self.mz = self.managed_group[str(omsi_format_msidata.mzdata_name)][:]
             else:
                 self.mz = self.managed_group[
-                    unicode(omsi_format_msidata.mzdata_name)]
+                    str(omsi_format_msidata.mzdata_name)]
             # Initalize the data shape
             if self.format_type == omsi_format_msidata.format_types['full_cube']:
                 self.shape = self.datasets[0].shape
                 self.is_valid = True
             else:
-                self.shape = self.managed_group[unicode(omsi_format_msidata_partial_cube.shape_name)][:]
+                self.shape = self.managed_group[str(omsi_format_msidata_partial_cube.shape_name)][:]
 
             # We are done initializing all variables for the 'full_cube' format
             # Initialize the xy index, inv_xy_index and mz-index for the other
             # formats
             if self.format_type != omsi_format_msidata.format_types['full_cube']:
                 if preload_xy_index:
-                    self.xy_index = self.managed_group[unicode(omsi_format_msidata_partial_cube.xy_index_name)][:]
+                    self.xy_index = self.managed_group[str(omsi_format_msidata_partial_cube.xy_index_name)][:]
                     self.inv_xy_index = \
-                        self.managed_group[unicode(omsi_format_msidata_partial_cube.inv_xy_index_name)][:]
+                        self.managed_group[str(omsi_format_msidata_partial_cube.inv_xy_index_name)][:]
                     if self.format_type == omsi_format_msidata.format_types['partial_spectra']:
                         self.xy_index_end = \
-                            self.managed_group[unicode(omsi_format_msidata_partial_spectra.xy_index_end_name)][:]
+                            self.managed_group[str(omsi_format_msidata_partial_spectra.xy_index_end_name)][:]
                         self.mz_index = self.managed_group[
-                            unicode(omsi_format_msidata_partial_spectra.mz_index_name)]
+                            str(omsi_format_msidata_partial_spectra.mz_index_name)]
                         # We have successfully loaded all data for the
                         # partial_spectra case
                         self.is_valid = True
@@ -469,12 +471,12 @@ class omsi_file_msidata(omsi_dependencies_manager,
                         # partial_cube case
                         self.is_valid = True
                 else:
-                    self.xy_index = self.managed_group[unicode(omsi_format_msidata_partial_cube.xy_index_name)]
-                    self.inv_xy_index = self.managed_group[unicode(omsi_format_msidata_partial_cube.inv_xy_index_name)]
+                    self.xy_index = self.managed_group[str(omsi_format_msidata_partial_cube.xy_index_name)]
+                    self.inv_xy_index = self.managed_group[str(omsi_format_msidata_partial_cube.inv_xy_index_name)]
                     if self.format_type == omsi_format_msidata.format_types['partial_spectra']:
                         self.xy_index_end = \
-                            self.managed_group[unicode(omsi_format_msidata_partial_spectra.xy_index_end_name)]
-                        self.mz_index = self.managed_group[unicode(omsi_format_msidata_partial_spectra.mz_index_name)]
+                            self.managed_group[str(omsi_format_msidata_partial_spectra.xy_index_end_name)]
+                        self.mz_index = self.managed_group[str(omsi_format_msidata_partial_spectra.mz_index_name)]
                         # We have successfully loaded all data for the
                         # partial_spectra case
                         self.is_valid = True
@@ -501,7 +503,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
 
         :returns: h5py object of the requested mz dataset.
         """
-        return self.managed_group[unicode(omsi_format_msidata.mzdata_name)]
+        return self.managed_group[str(omsi_format_msidata.mzdata_name)]
 
     def __setitem__(self, key, value):
         """
@@ -593,7 +595,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
 
         # Complete the input selection if it is only partially specified. In this way we can
         # assume in the following code that we always have three key selection parameters
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             return super(omsi_file_msidata, self).__getitem__(key)
         elif not isinstance(key, tuple):
             key = (key, slice(None), slice(None))
@@ -672,7 +674,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
             # Otherwise return a list of numpy arrays with the requested data
             # completed with None objects for missing data
             filldata = [None] * indexlist.size
-            for i in xrange(0, indexlist.size):
+            for i in range(0, indexlist.size):
                 if indexlist[i] >= 0:
                     filldata[i] = data[cleanindexlist[i], :]
             return filldata
@@ -831,7 +833,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
         """
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
         # Data format
-        format_dataset = data_group.require_dataset(name=unicode(omsi_format_msidata.format_name), shape=(1,),
+        format_dataset = data_group.require_dataset(name=str(omsi_format_msidata.format_name), shape=(1,),
                                                     dtype=omsi_format_common.str_type)
         format_dataset[0] = 'full_cube'
         # mz data
@@ -922,7 +924,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
         """
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
         # Data format
-        format_dataset = data_group.require_dataset(name=unicode(
+        format_dataset = data_group.require_dataset(name=str(
             omsi_format_msidata.format_name), shape=(1,), dtype=omsi_format_common.str_type)
         format_dataset[0] = 'partial_cube'
         # mz data
@@ -973,8 +975,8 @@ class omsi_file_msidata(omsi_dependencies_manager,
         inv_xy_index_dataset = data_group.require_dataset(name=omsi_format_msidata_partial_cube.inv_xy_index_name,
                                                           shape=(numspectra, 2),
                                                           dtype=xy_index_dtype)
-        for x_index in xrange(0, data_shape[0]):
-            for y_index in xrange(0, data_shape[1]):
+        for x_index in range(0, data_shape[0]):
+            for y_index in range(0, data_shape[1]):
                 if xy_index_dataset[x_index, y_index] >= 0:
                     inv_xy_index_dataset[xy_index_dataset[x_index, y_index], :] = np.asarray([x_index, y_index])
 
@@ -1052,7 +1054,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
         """
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
         # Data format
-        format_dataset = data_group.require_dataset(name=unicode(
+        format_dataset = data_group.require_dataset(name=str(
             omsi_format_msidata.format_name), shape=(1,), dtype=omsi_format_common.str_type)
         format_dataset[0] = 'partial_spectra'
         # mz data
@@ -1158,8 +1160,8 @@ class omsi_file_msidata(omsi_dependencies_manager,
         temp_count_xy_index[:] = -1
         temp_count_xy_index[mask] = np.insert(
             np.cumsum(np.ones(shape=spectra_length.shape, dtype='uint16')[mask]), 0, 0)[0:-1]
-        for x_index in xrange(0, spectra_length.shape[0]):
-            for y_index in xrange(0, spectra_length.shape[1]):
+        for x_index in range(0, spectra_length.shape[0]):
+            for y_index in range(0, spectra_length.shape[1]):
                 if temp_count_xy_index[x_index, y_index] >= 0:
                     inv_xy_index_dataset[temp_count_xy_index[x_index, y_index], :] = np.asarray([x_index, y_index])
 
@@ -1212,7 +1214,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
         # Get the donor dataset. Try tp get the main dataset first. If it is
         # not found take the first one from the list.
         try:
-            dset = self.managed_group .get(unicode(omsi_format_msidata.dataset_name + "0"))
+            dset = self.managed_group .get(str(omsi_format_msidata.dataset_name + "0"))
         except:
             dset = self.datasets[0]
 
@@ -1288,13 +1290,13 @@ class omsi_file_msidata(omsi_dependencies_manager,
             numchunksz = int(math.ceil(float(source.shape[2]) / float(chunks[2])))
             numchunks = numchunksx * numchunksy * numchunksz
             itertest = 0
-            for x_chunk_index in xrange(0, numchunksx):
+            for x_chunk_index in range(0, numchunksx):
                 xstart = x_chunk_index * chunks[0]
                 xend = min(xstart + chunks[0], source.shape[0])
-                for y_chunk_index in xrange(0, numchunksy):
+                for y_chunk_index in range(0, numchunksy):
                     ystart = y_chunk_index * chunks[1]
                     yend = min(ystart + chunks[1], source.shape[1])
-                    for z_chunk_index in xrange(0, numchunksz):
+                    for z_chunk_index in range(0, numchunksz):
                         zstart = z_chunk_index * chunks[2]
                         zend = min(zstart + chunks[2], source.shape[2])
                         destination[xstart:xend, ystart:yend, zstart:zend] = \
@@ -1313,10 +1315,10 @@ class omsi_file_msidata(omsi_dependencies_manager,
             numchunksy = int(math.ceil(float(source.shape[1]) / float(chunks[1])))
             numchunks = numchunksx * numchunksy
             itertest = 0
-            for x_chunk_index in xrange(0, numchunksx):
+            for x_chunk_index in range(0, numchunksx):
                 xstart = x_chunk_index * chunks[0]
                 xend = min(xstart + chunks[0], source.shape[0])
-                for y_chunk_index in xrange(0, numchunksy):
+                for y_chunk_index in range(0, numchunksy):
                     ystart = y_chunk_index * chunks[1]
                     yend = min(ystart + chunks[1], source.shape[1])
                     destination[xstart:xend, ystart:yend] = source[xstart:xend, ystart:yend]
@@ -1334,7 +1336,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
                 math.ceil(float(source.shape[0]) / float(destination.chunks[0])))
             numchunks = numchunksx
             itertest = 0
-            for x_chunk_index in xrange(0, numchunksx):
+            for x_chunk_index in range(0, numchunksx):
                 xstart = x_chunk_index * chunks[0]
                 xend = min(xstart + chunks[0], source.shape[0])
                 destination[xstart:xend] = source[xstart:xend]
@@ -1434,9 +1436,9 @@ class omsi_file_msidata(omsi_dependencies_manager,
             pass
 
         if print_info:
-            print "Selection: " + str(keys)
-            print "Suggest: " + str(suggestion.chunks)
-            print "Alternatives: " + str([dset.chunks for dset in self.datasets])
+            print("Selection: " + str(keys))
+            print("Suggest: " + str(suggestion.chunks))
+            print("Alternatives: " + str([dset.chunks for dset in self.datasets]))
 
         return suggestion
 

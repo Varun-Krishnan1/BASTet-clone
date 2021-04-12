@@ -58,7 +58,7 @@ class WebHelper(object):
         """
         import requests
         import getpass
-        import urllib
+        import urllib.request, urllib.parse, urllib.error
 
         newt_base_url = "https://newt.nersc.gov/newt"
         newt_auth_url = newt_base_url+"/auth"
@@ -66,12 +66,12 @@ class WebHelper(object):
 
         uname = username
         if uname is None:
-            print "Please enter the user name"
+            print("Please enter the user name")
             if uname == "" or uname is None:
                 uname = getpass.getuser()
                 tmp = getpass.getpass("Username: (default="+uname+")")
                 uname = uname if tmp == "" else tmp
-                print tmp, uname
+                print(tmp, uname)
         target = target_dir if target_dir is not None else ("/project/projectdirs/openmsi/omsi_data_private/" + uname)
 
         s = session
@@ -79,7 +79,7 @@ class WebHelper(object):
         if s is None:  # Login to newt
 
             s = requests.Session()
-            print "Please enter your NERSC Password"
+            print("Please enter your NERSC Password")
             password = getpass.getpass(prompt="Enter password for user \"" + uname + "\" \n")
 
             r = s.post(newt_auth_url, {"username": uname, "password": password})
@@ -115,7 +115,7 @@ class WebHelper(object):
             # addfilepath = fullname.lstrip("/global")
             query_params = {'file': fullname, 'owner': uname}
             add_file_url += "?"
-            add_file_url += urllib.urlencode(query_params)
+            add_file_url += urllib.parse.urlencode(query_params)
             result_3 = requests.get(url=add_file_url)
         else:
             result_3 = None
@@ -138,8 +138,8 @@ class WebHelper(object):
         :param jobid: The id of the current job.
         :param status: One of 'running', 'complete' or 'error'
         """
-        import urllib2
-        import urllib
+        import urllib.request, urllib.error, urllib.parse
+        import urllib.request, urllib.parse, urllib.error
 
         # If we are at NERSC then set the NERSC Apache permissions
         if 'nersc.gov' in db_server:
@@ -149,25 +149,25 @@ class WebHelper(object):
         update_status_url = os.path.join(db_server, "openmsi/processing/update")
         query_params = {'jobid': jobid, 'status': status}
         update_status_url += "?"
-        update_status_url += urllib.urlencode(query_params)
+        update_status_url += urllib.parse.urlencode(query_params)
 
         # Make the url request
         try:
             log_helper.info(__name__, "Updating job status: " + update_status_url)
-            url_response = urllib2.urlopen(url=update_status_url)
+            url_response = urllib.request.urlopen(url=update_status_url)
             if url_response.code == 200:
                 return True
-        except urllib2.HTTPError as request_error:
+        except urllib.error.HTTPError as request_error:
             raise ValueError("ERROR: job status could not be updated: \n" +
                              "      Error-code:" + str(request_error.code) + "\n" +
                              "      Error info:" + str(request_error.read()))
-        except urllib2.URLError as request_error:
+        except urllib.error.URLError as request_error:
             if sys.version_info >= (2, 7, 9):
                 import ssl
                 ssl_context = ssl.create_default_context()
                 ssl_context.check_hostname = False
                 ssl_context.verify_mode = ssl.CERT_NONE
-                url_response = urllib2.urlopen(url=update_status_url, context=ssl_context)
+                url_response = urllib.request.urlopen(url=update_status_url, context=ssl_context)
                 if url_response.code == 200:
                     return True
             else:
@@ -194,8 +194,8 @@ class WebHelper(object):
             :returns: Boolean indicating whether the operation was successful
 
         """
-        import urllib2
-        import urllib
+        import urllib.request, urllib.error, urllib.parse
+        import urllib.request, urllib.parse, urllib.error
 
         if jobid is not None:
             return WebHelper.update_job_status(filepath=filepath,
@@ -210,8 +210,8 @@ class WebHelper(object):
                     is_allowed_path = True
                     break
             if not is_allowed_path and file_user_name in WebHelper.super_users:
-                print "WARNING: Attempt to add a file to openmsi.nersc.gov that is not in a default location."
-                print "Do you want to add the file? (Y/N):"
+                print("WARNING: Attempt to add a file to openmsi.nersc.gov that is not in a default location.")
+                print("Do you want to add the file? (Y/N):")
                 num_trys = 3
                 timeout = 5*60  # Timeout after 5 minutes
                 for i in range(num_trys):
@@ -234,7 +234,7 @@ class WebHelper(object):
                                           " is not in a default location. User input unrecognized." +
                                           " Aborted adding the file to the DB.")
                             return False
-                        print "Unrecognized response. Do you want to add the file? (Y/N): "
+                        print("Unrecognized response. Do you want to add the file? (Y/N): ")
             elif not is_allowed_path:
                 warnings.warn("Adding file to the OpenMSI database in unconventional location not permitted for user.")
                 return False
@@ -260,17 +260,17 @@ class WebHelper(object):
             addfilepath = filepath.lstrip("/global")
         query_params = {'file': os.path.abspath(addfilepath), 'owner': curr_user}
         add_file_url += "?"
-        add_file_url += urllib.urlencode(query_params)
+        add_file_url += urllib.parse.urlencode(query_params)
         # add_file_url = add_file_url + "?file=" + \
         #    os.path.abspath(filepath) + "&user=" + curr_user
 
         # Make the url request
         try:
             log_helper.info(__name__, "Registering file with DB: " + add_file_url)
-            url_response = urllib2.urlopen(url=add_file_url)
+            url_response = urllib.request.urlopen(url=add_file_url)
             if url_response.code == 200:
                 return True
-        except urllib2.HTTPError as request_error:
+        except urllib.error.HTTPError as request_error:
             raise ValueError("ERROR: File could not be added to DB: \n" +
                              "      Error-code:" + str(request_error.code) + "\n" +
                              "      Error info:" + str(request_error.read()))
@@ -351,14 +351,14 @@ class WebHelper(object):
 
         # Define the sender and recipients
         sender_name, sender_addr = parseaddr(sender)
-        sender_name = str(Header(unicode(sender_name), header_charset))
+        sender_name = str(Header(str(sender_name), header_charset))
         sender_addr = sender_addr.encode('ascii')
 
         tostr = ""
         for ri in range(len(recipients)):
             rec = recipients[ri]
             recname, recaddr = parseaddr(rec)
-            recname = str(Header(unicode(recname), header_charset))
+            recname = str(Header(str(recname), header_charset))
             recaddr = recaddr.encode('ascii')
             tostr += formataddr((recname, recaddr))
             if ri < (len(recipients)-1):
@@ -368,7 +368,7 @@ class WebHelper(object):
         msg = MIMEText(body.encode(body_charset), 'plain', body_charset)
         msg['From'] = formataddr((sender_name, sender_addr))
         msg['To'] = tostr
-        msg['Subject'] = Header(unicode(subject), header_charset)
+        msg['Subject'] = Header(str(subject), header_charset)
 
         # Send the message using sendmail
         try:

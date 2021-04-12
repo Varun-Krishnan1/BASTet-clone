@@ -54,14 +54,14 @@ class log_helper(object):
         :param level: The logging levels to be used, one of the values specified in log_helper.log_levels.
         """
         log_helper.debug(__name__, "Setting log level to " + str(level))
-        if level not in log_helper.log_levels.values():
+        if level not in list(log_helper.log_levels.values()):
             try:
                 level = log_helper.log_levels[level]
             except KeyError:
                 raise KeyError('Invalid log level given')
         log_helper.global_log_level = level
         ld = logging.Logger.manager.loggerDict
-        for k in ld.keys():
+        for k in list(ld.keys()):
             if k.startswith('omsi.'):
                 cls.get_logger(k).setLevel(level)
 
@@ -98,9 +98,9 @@ class log_helper(object):
         :param kwargs: Variables+values to be logged
 
         """
-        for var_name, var_value in kwargs.iteritems():
+        for var_name, var_value in kwargs.items():
             try:
-                message = unicode(var_name) + " = " + unicode(var_value)
+                message = str(var_name) + " = " + str(var_value)
                 log_helper.log(level=level, module_name=module_name, root=root, comm=comm, message=message)
             except:
                 message = "Logging of " + var_name + " for " + module_name + " failed"
@@ -124,7 +124,7 @@ class log_helper(object):
         """
         if level is None:
             level = log_helper.log_levels['INFO']
-        if level in log_helper.log_levels.keys():
+        if level in list(log_helper.log_levels.keys()):
             level = log_helper.log_levels[level]
         if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).log(level, message, *args, **kwargs)

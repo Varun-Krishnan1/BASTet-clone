@@ -5,58 +5,58 @@ def main(argv=None):
     """Then main function"""
 
     npV1 = normalize_by_percentiles_V1()
-    print ""
-    print ""
+    print("")
+    print("")
 
     npV2 = normalize_by_percentiles_V2()
-    print ""
-    print ""
+    print("")
+    print("")
 
     npV3 = normalize_by_percentiles_V3()
-    print ""
-    print ""
+    print("")
+    print("")
 
-    print "#################################################################"
-    print "##   Generating test data                                      ##"
-    print "#################################################################"
+    print("#################################################################")
+    print("##   Generating test data                                      ##")
+    print("#################################################################")
     data0 = np.arange(50).reshape(5,5,2)
     data0[ data0<15 ] = 0
-    print "Test data:"
-    print data0
-    print "#################################################################"
-    print "##   Testing Normalize by percentile; Version 1                ##"
-    print "#################################################################"
+    print("Test data:")
+    print(data0)
+    print("#################################################################")
+    print("##   Testing Normalize by percentile; Version 1                ##")
+    print("#################################################################")
     npV1_secondary = {}
     npV1_result = transform_and_reduce_data(data=data0, operations=npV1, secondary_data=npV1_secondary)
-    print "Result: Normalize by percentile; Version 1:"
-    print npV1_result
-    print ""
-    print "#################################################################"
-    print "##   Testing Normalize by percentile; Version 2                ##"
-    print "#################################################################"
+    print("Result: Normalize by percentile; Version 1:")
+    print(npV1_result)
+    print("")
+    print("#################################################################")
+    print("##   Testing Normalize by percentile; Version 2                ##")
+    print("#################################################################")
     npV2_secondary = {}
     npV2_result = transform_and_reduce_data(data=data0, operations=npV2, secondary_data=npV2_secondary)
     if np.all(npV1_result == npV2_result) :
-        print "Results of normalization version 1 and 2 match!"
+        print("Results of normalization version 1 and 2 match!")
     else :
-        print "Result: Normalize by percentile; Version 2:"
-        print npV2_result
-    print "#################################################################"
-    print "##   Testing Normalize by percentile; Version 3                ##"
-    print "#################################################################"
+        print("Result: Normalize by percentile; Version 2:")
+        print(npV2_result)
+    print("#################################################################")
+    print("##   Testing Normalize by percentile; Version 3                ##")
+    print("#################################################################")
     npV3_secondary = {}
     npV3_result = transform_and_reduce_data(data=data0, operations=npV3, secondary_data=npV3_secondary)
-    print "Result: Normalize by percentile; Version 3:"
-    print npV3_result
+    print("Result: Normalize by percentile; Version 3:")
+    print(npV3_result)
 
 
 def printDict(d):
     """Helper function used to print dicts in a more readable way"""
-    print "____________________________________________"
-    for key,value in d.items():
-        print key
-        print value
-    print "____________________________________________"
+    print("____________________________________________")
+    for key,value in list(d.items()):
+        print(key)
+        print(value)
+    print("____________________________________________")
 
 
 def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
@@ -97,24 +97,24 @@ def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
                                      a_max=1 )
     operations_json = transform_reduce_description_to_json(reduce_max, minus_p5, divide_by_p95 , clip)
 
-    print "#################################################################"
-    print "##   Normalize by percentiles: Version 1                       ##"
-    print "#################################################################"
-    print "1) Purpose:"
-    print ""
-    print "Normalize the data by: i) subtracting by the "+str(lower_percentile)+"'tile,"
-    print "                       ii) divide by the "+str(upper_percentile)+"%'tile computed from the data after subtraction,"
-    print "                       iii) clip the data so that all values are in the range of [0,1]."
-    print ""
-    print "2) Illustration of the calculation performed:"
-    print ""
-    print "                /-->percentile(5)--\        /-->percentile(95)-->astype('float')--\ "
-    print "               /                    \      /                                       \ "
-    print "data-->reduce(max)---------->minus( -- )-->------------------------------>divide( -- )-->clip(0,1)-->output"
-    print ""
-    print "3) JSON description of the above calculation:"
-    print ""
-    print operations_json
+    print("#################################################################")
+    print("##   Normalize by percentiles: Version 1                       ##")
+    print("#################################################################")
+    print("1) Purpose:")
+    print("")
+    print("Normalize the data by: i) subtracting by the "+str(lower_percentile)+"'tile,")
+    print("                       ii) divide by the "+str(upper_percentile)+"%'tile computed from the data after subtraction,")
+    print("                       iii) clip the data so that all values are in the range of [0,1].")
+    print("")
+    print("2) Illustration of the calculation performed:")
+    print("")
+    print("                /-->percentile(5)--\        /-->percentile(95)-->astype('float')--\ ")
+    print("               /                    \      /                                       \ ")
+    print("data-->reduce(max)---------->minus( -- )-->------------------------------>divide( -- )-->clip(0,1)-->output")
+    print("")
+    print("3) JSON description of the above calculation:")
+    print("")
+    print(operations_json)
 
     return operations_json
 
@@ -176,29 +176,29 @@ def normalize_by_percentiles_V2( lower_percentile=5. , upper_percentile=95. ):
                                                             clip,
                                                             )
 
-    print "######################################################################"
-    print "##   Normalize by percentiles: Version 2 (explicit data references) ##"
-    print "######################################################################"
-    print "1) Purpose:"
-    print ""
-    print "Normalize the data by: i)   plow = "+str(lower_percentile)+"%'tile from the input data"
-    print "                       ii)  phigh = "+str(upper_percentile)+"%'tile from the input data"
-    print "                       iii) phigh_as_float = float( phigh - plow )"
-    print "                       iv)  Compute: (data-plow) / phigh_as_float"
-    print "                       v)   Clip the result so that all values are in the range of [0,1]."
-    print ""
-    print "2) Illustration of the calculation performed:"
-    print ""
-    print "         percentile(reduce_max,95)-->minus(..,plow)-->astype(..,'float')-->phigh_as_float-->| "
-    print "                        |                       /                                           | "
-    print "                        |                 /----/                                            | "
-    print "         percentile(reduce_max,5)-->plow--\                                                 | "
-    print "                        |                  \                                                | "
-    print "data-->reduce(max)-->reduce_max-->minus(..,plow)------------------->divide( .. , phigh_as_float )-->clip(0,1)-->output"
-    print ""
-    print "3) JSON description of the above calculation:"
-    print ""
-    print operations_json
+    print("######################################################################")
+    print("##   Normalize by percentiles: Version 2 (explicit data references) ##")
+    print("######################################################################")
+    print("1) Purpose:")
+    print("")
+    print("Normalize the data by: i)   plow = "+str(lower_percentile)+"%'tile from the input data")
+    print("                       ii)  phigh = "+str(upper_percentile)+"%'tile from the input data")
+    print("                       iii) phigh_as_float = float( phigh - plow )")
+    print("                       iv)  Compute: (data-plow) / phigh_as_float")
+    print("                       v)   Clip the result so that all values are in the range of [0,1].")
+    print("")
+    print("2) Illustration of the calculation performed:")
+    print("")
+    print("         percentile(reduce_max,95)-->minus(..,plow)-->astype(..,'float')-->phigh_as_float-->| ")
+    print("                        |                       /                                           | ")
+    print("                        |                 /----/                                            | ")
+    print("         percentile(reduce_max,5)-->plow--\                                                 | ")
+    print("                        |                  \                                                | ")
+    print("data-->reduce(max)-->reduce_max-->minus(..,plow)------------------->divide( .. , phigh_as_float )-->clip(0,1)-->output")
+    print("")
+    print("3) JSON description of the above calculation:")
+    print("")
+    print(operations_json)
 
     return operations_json
 
@@ -248,28 +248,28 @@ def normalize_by_percentiles_V3( lower_percentile=5. , upper_percentile=95. ):
                                      a_max=1 )
     operations_json = transform_reduce_description_to_json(reduce_max, minus_p5, divide_by_p95 , clip)
 
-    print "#################################################################"
-    print "##   Normalize by percentiles: Version 3                       ##"
-    print "#################################################################"
-    print "1) Purpose:"
-    print ""
-    print "Normalize the data by: i) subtracting by the "+str(lower_percentile)+"'tile,"
-    print "                       ii) divide by the "+str(upper_percentile)+"%'tile computed from the data after subtraction,"
-    print "                       iii) clip the data so that all values are in the range of [0,1]."
-    print ""
-    print "2) Illustration of the calculation performed:"
-    print ""
-    print "               |--select_values( .. , greater(..,0))--|              |--select_values( .. , greater(..,0))--| "
-    print "               |                                      |              |                                      | "
-    print "               |----------------------->percentile(x1=|, q=5)--|     |----------------------->percentile(x1=|, q=95)-->astype('float')--| "
-    print "               |                                               |     |                                                                  | "
-    print "data-->reduce(max)---------------------------------->minus(.., | )-->--------------------------------------------------------------|    | "
-    print "                                                                                                                                   |    | "
-    print "                                                                                                       output<--clip(0,1)<--divide(|  , |)"
-    print ""
-    print "3) JSON description of the above calculation:"
-    print ""
-    print operations_json
+    print("#################################################################")
+    print("##   Normalize by percentiles: Version 3                       ##")
+    print("#################################################################")
+    print("1) Purpose:")
+    print("")
+    print("Normalize the data by: i) subtracting by the "+str(lower_percentile)+"'tile,")
+    print("                       ii) divide by the "+str(upper_percentile)+"%'tile computed from the data after subtraction,")
+    print("                       iii) clip the data so that all values are in the range of [0,1].")
+    print("")
+    print("2) Illustration of the calculation performed:")
+    print("")
+    print("               |--select_values( .. , greater(..,0))--|              |--select_values( .. , greater(..,0))--| ")
+    print("               |                                      |              |                                      | ")
+    print("               |----------------------->percentile(x1=|, q=5)--|     |----------------------->percentile(x1=|, q=95)-->astype('float')--| ")
+    print("               |                                               |     |                                                                  | ")
+    print("data-->reduce(max)---------------------------------->minus(.., | )-->--------------------------------------------------------------|    | ")
+    print("                                                                                                                                   |    | ")
+    print("                                                                                                       output<--clip(0,1)<--divide(|  , |)")
+    print("")
+    print("3) JSON description of the above calculation:")
+    print("")
+    print(operations_json)
 
     return operations_json
 

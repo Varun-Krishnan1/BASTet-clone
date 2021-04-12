@@ -56,7 +56,7 @@ class omsi_xy_resize(omsi_analysis_base):
         try:
             from skimage.transform import resize
         except ImportError:
-            print "This analysis requires package skimage.transform.resize.  Install and try again."
+            print("This analysis requires package skimage.transform.resize.  Install and try again.")
             raise AttributeError
 
         #unpack variables

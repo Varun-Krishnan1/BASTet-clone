@@ -219,7 +219,7 @@ class cl_analysis_driver(analysis_driver_base):
             arg_group_dict = {arg_param.get_group_name(): arg_param.get_group_description()
                               for arg_param in self.analysis_object.get_all_parameter_data()
                               if arg_param.get_group_name() is not None}
-            for group_name, group_description in arg_group_dict.iteritems():
+            for group_name, group_description in arg_group_dict.items():
                 self.custom_argument_groups[group_name] = self.parser.add_argument_group(title=group_name,
                                                                                          description=group_description)
 
@@ -250,7 +250,7 @@ class cl_analysis_driver(analysis_driver_base):
                                      default='INFO',
                                      required=False,
                                      help='Specify the level of logging to be used.',
-                                     choices=log_helper.log_levels.keys())
+                                     choices=list(log_helper.log_levels.keys()))
 
     def parse_cl_arguments(self):
         """
@@ -303,7 +303,7 @@ class cl_analysis_driver(analysis_driver_base):
         # The --loglovel argument
         if self.log_level_arg_name in parsed_arguments:
             user_log_level = parsed_arguments.pop(self.log_level_arg_name)
-            if user_log_level in log_helper.log_levels.keys():
+            if user_log_level in list(log_helper.log_levels.keys()):
                 log_helper.set_log_level(level=log_helper.log_levels[user_log_level])
             else:
                 log_helper.error(module_name=__name__, message="Invalid log level specified")
@@ -370,15 +370,15 @@ class cl_analysis_driver(analysis_driver_base):
         Print the analysis settings.
         """
         log_helper.info(__name__, "Inputs:")
-        for key, value in self.analysis_arguments.iteritems():
-            log_helper.info(__name__, "   " + unicode(key) + " = " + unicode(value))
+        for key, value in self.analysis_arguments.items():
+            log_helper.info(__name__, "   " + str(key) + " = " + str(value))
         if self.output_target is not None:
             if isinstance(self.output_target, omsi_file_common):
                 h5py_object = omsi_file_common.get_h5py_object(self.output_target)
-                log_helper.info(__name__, "Save to: " + unicode(h5py_object.file.filename)
-                                + u":" + unicode(h5py_object.name))
+                log_helper.info(__name__, "Save to: " + str(h5py_object.file.filename)
+                                + ":" + str(h5py_object.name))
             else:
-                log_helper.info(__name__, "Save to: " + unicode(self.output_target))
+                log_helper.info(__name__, "Save to: " + str(self.output_target))
 
     def remove_output_target(self):
         """
@@ -394,11 +394,11 @@ class cl_analysis_driver(analysis_driver_base):
         if self.__output_target_self is not None:
             try:
                 os.remove(self.__output_target_self)
-                log_helper.info(__name__, "Successfully removed output target: " + unicode(self.__output_target_self))
+                log_helper.info(__name__, "Successfully removed output target: " + str(self.__output_target_self))
                 success = True
             except:
                 log_helper.error(__name__, "Clean-up of output failed. File may be left on system: "
-                                 + unicode(self.__output_target_self))
+                                 + str(self.__output_target_self))
         elif self.output_target is not None:
             log_helper.info(__name__, "Output target not removed because it was not created " +
                                       "by the analysis but potentially modified by it")
@@ -428,10 +428,10 @@ class cl_analysis_driver(analysis_driver_base):
 
         # Check if we have a valid analysis class
         if self.analysis_class is None:
-            print self.parser.print_help()
+            print(self.parser.print_help())
             raise ValueError('Could not determine the analysis class.')
         if not issubclass(self.analysis_class, analysis_base):
-            print self.parser.print_help()
+            print(self.parser.print_help())
             raise ValueError('Analysis class is not a subclass of analysis_base.')
 
         try:
@@ -467,17 +467,17 @@ class cl_analysis_driver(analysis_driver_base):
         if mpi_helper.get_rank() == self.mpi_root:
             # Print the profiling results of time and usage
             if self.analysis_object['profile_time_and_usage']:
-                print ""
-                print "PROFILING DATA: TIME AND USAGE"
-                print ""
+                print("")
+                print("PROFILING DATA: TIME AND USAGE")
+                print("")
                 self.analysis_object.get_profile_stats_object(consolidate=True).print_stats()
 
             # Print the profiling results for memory usage
             if self.analysis_object['profile_memory']:
-                print ""
-                print "PROFILING DATA: MEMORY"
-                print ""
-                print self.analysis_object.get_memory_profile_info()
+                print("")
+                print("PROFILING DATA: MEMORY")
+                print("")
+                print(self.analysis_object.get_memory_profile_info())
 
             # Print the time it took to run the analysis
             try:

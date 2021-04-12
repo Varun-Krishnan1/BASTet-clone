@@ -125,7 +125,7 @@ def area_near_peak(x1, halfpeakwidth=2, **kwargs):
     maxMasses = np.argmax(x1,2)
     for x in range(x1.shape[0]):
         for y in range(x1.shape[1]):
-            peak=(range(-halfpeakwidth, halfpeakwidth+1) + maxMasses[x,y]).astype(int)
+            peak=(list(range(-halfpeakwidth, halfpeakwidth+1)) + maxMasses[x,y]).astype(int)
             for p in peak:
                 if p<0:
                     continue
@@ -652,7 +652,7 @@ def selection_to_string(selection):
         if selection_string is None:
             selection_string = ""
         return selection_string
-    elif isinstance(selection, basestring):
+    elif isinstance(selection, str):
         if check_selection_string(selection) >= 0:
             return selection
         else:
@@ -682,7 +682,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
     elif selectiontype == selection_type['index']:
         return [selection_string_to_object(selection_string)]
     elif selectiontype == selection_type['all']:
-        return range(0, axis_size)
+        return list(range(0, axis_size))
     elif selectiontype == selection_type['range']:
         slice_object = selection_string_to_object(selection_string)
         if slice_object.start is not None:
@@ -697,7 +697,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
             step = slice_object.step
         else:
             step = 1
-        return range(start, stop, step)
+        return list(range(start, stop, step))
     elif selection_type == selection_type['multiaxis']:
         selection_tuple = selection_string_to_object(selection_string)
         selection_lists = []
@@ -710,7 +710,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
         for axis_index, axis_selection in enumerate(selection_tuple):
             selection_lists.append(selection_to_indexlist(selection_string=axis_selection,
                                                           axis_size=axis_sizes[axis_index]))
-            return zip(*selection_lists)
+            return list(zip(*selection_lists))
     else:
         return None
 
@@ -753,11 +753,11 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         if http_error:
             return HttpResponseNotFound("Requested data reduction " + str(reduction) +
                                         " not supported. Valid reduction operations are:" +
-                                        str(reduction_allowed_functions.keys()))
+                                        str(list(reduction_allowed_functions.keys())))
         else:
             raise ValueError("Requested data reduction " + str(reduction) +
                              " not supported. Valid reduction operations are:" +
-                             str(reduction_allowed_functions.keys()))
+                             str(list(reduction_allowed_functions.keys())))
 
     # 1.3) Check if we have a valid axis parameter
     axis_specified = 'axis' in kwargs
@@ -796,7 +796,7 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
                 selection = evaluate_transform_parameter(parameter=selection,
                                                          data=x1,
                                                          secondary_data=secondary_data)
-            if isinstance(selection, str) or isinstance(selection, unicode):
+            if isinstance(selection, str) or isinstance(selection, str):
                 selection = selection_string_to_object(selection)
         else:
             selection = slice(None)
@@ -817,12 +817,12 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         if http_error:
             return HttpResponseNotFound("Requested data reduction " + str(reduction) +
                                         " failed or not supported. Valid reduction" +
-                                        "operations are:" + str(reduction_allowed_functions.keys()) +
+                                        "operations are:" + str(list(reduction_allowed_functions.keys())) +
                                         " " + str(sys.exc_info()))
         else:
             raise ValueError("Requested data reduction " + str(reduction) +
                              " failed or not supported. Valid reduction" +
-                             "operations are:" + str(reduction_allowed_functions.keys()) +
+                             "operations are:" + str(list(reduction_allowed_functions.keys())) +
                              " " + str(sys.exc_info()))
 
 
@@ -876,7 +876,7 @@ def transform_and_reduce_data(data,
             return data
 
     # 2) Load the JSON specification of data transformation if necessary
-    if isinstance(operations, str) or isinstance(operations, unicode):
+    if isinstance(operations, str) or isinstance(operations, str):
         try:
             operations = json.loads(operations)
         except:
@@ -1063,7 +1063,7 @@ def transform_data_single(data,
     else:
         axislists = []
         for axisindex in axes:
-            axislists.append(range(data.shape[axisindex]))
+            axislists.append(list(range(data.shape[axisindex])))
         chunks = itertools.product(*axislists)
         outdata = np.zeros(shape=data.shape, dtype=np.dtype('float'))
         for chunk in chunks:
@@ -1263,7 +1263,7 @@ def evaluate_transform_parameter(parameter,
                                          secondary_data=secondary_data,
                                          http_error=False)
     else:
-        if parameter in secondary_data or unicode(parameter) in secondary_data:
+        if parameter in secondary_data or str(parameter) in secondary_data:
             return secondary_data[parameter]
         else:
             return parameter
@@ -1339,14 +1339,14 @@ def is_transform_or_reduce(parameter):
     # 1) If the parameter is a built in type, then return the parameter
     if isinstance(parameter, int) or \
        isinstance(parameter, float) or \
-       isinstance(parameter, long) or \
+       isinstance(parameter, int) or \
        isinstance(parameter, complex) or \
        isinstance(parameter, bool):
         return False
 
     # 2) Try to convert the parameter to the list of dict based description
     evalparam = parameter
-    if isinstance(parameter, str) or isinstance(parameter, unicode):
+    if isinstance(parameter, str) or isinstance(parameter, str):
         if parameter == 'data':
             return False
         try:
@@ -1419,8 +1419,8 @@ def construct_transform_dict(trans_type, axes=None, **kwargs):
     if trans_type == transformation_type['dualDataTransform'] or trans_type == transformation_type['arithmetic']:
         if 'operation' in kwargs:
             if not kwargs['operation'] in transformation_allowed_dual_data:
-                raise ValueError(unicode("Requested arithmetic operation not supported. Allowed operations are") +
-                                 unicode(transformation_allowed_dual_data.keys()))
+                raise ValueError(str("Requested arithmetic operation not supported. Allowed operations are") +
+                                 str(list(transformation_allowed_dual_data.keys())))
         else:
             raise KeyError(
                 "Missing parameter operations for arithmetic data transformation.")
@@ -1428,8 +1428,8 @@ def construct_transform_dict(trans_type, axes=None, **kwargs):
     if trans_type == transformation_type['singleDataTransform'] or trans_type == transformation_type['scale']:
         if 'operation' in kwargs:
             if not kwargs['operation'] in transformation_allowed_single_data:
-                raise ValueError(unicode("Requested scale operation not supported. Allowed operations are") +
-                                 unicode(transformation_allowed_single_data.keys()))
+                raise ValueError(str("Requested scale operation not supported. Allowed operations are") +
+                                 str(list(transformation_allowed_single_data.keys())))
         else:
             raise KeyError("Missing parameter operations for scale data transformation.")
     # 1.3) Check if we have threshold parameter for the threshold operation
@@ -1441,9 +1441,9 @@ def construct_transform_dict(trans_type, axes=None, **kwargs):
         if 'dtype' not in kwargs:
             raise KeyError("Missing parameter dtype for astype transformation")
 
-    transdict = {'transformation': unicode(trans_type), 'axes': axes}
-    for key, value in kwargs.items():
-        transdict[unicode(key)] = value
+    transdict = {'transformation': str(trans_type), 'axes': axes}
+    for key, value in list(kwargs.items()):
+        transdict[str(key)] = value
     return transdict
 
 
@@ -1470,11 +1470,11 @@ def construct_reduce_dict(reduction_type, **kwargs):
 
     """
     if reduction_type not in reduction_allowed_functions:
-        raise ValueError(unicode("Requested reduction operation not supported. Allowed operations are") +
-                         unicode(reduction_allowed_functions.keys()))
-    reducdict = {'reduction': unicode(reduction_type)}
-    for key, value in kwargs.items():
-        reducdict[unicode(key)] = value
+        raise ValueError(str("Requested reduction operation not supported. Allowed operations are") +
+                         str(list(reduction_allowed_functions.keys())))
+    reducdict = {'reduction': str(reduction_type)}
+    for key, value in list(kwargs.items()):
+        reducdict[str(key)] = value
     return reducdict
 
 

@@ -66,7 +66,7 @@ class omsi_findpeaks_local(analysis_base):
                            help='Scheduling to be used for parallel MPI runs',
                            dtype=str,
                            required=False,
-                           choices=mpi_helper.parallel_over_axes.SCHEDULES.values(),
+                           choices=list(mpi_helper.parallel_over_axes.SCHEDULES.values()),
                            group=groups['parallel'],
                            default=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
         self.add_parameter(name='collect',
@@ -121,7 +121,7 @@ class omsi_findpeaks_local(analysis_base):
             if (check_selection_string(x) == selection_type['indexlist']) and \
                     (check_selection_string(y) == selection_type['indexlist']):
                 if len(x_list) == len(y_list):
-                    items = [(x_list[i], y_list[i]) for i in xrange(0, len(x_list))]
+                    items = [(x_list[i], y_list[i]) for i in range(0, len(x_list))]
                 else:
                     return None, None
             else:
@@ -190,13 +190,13 @@ class omsi_findpeaks_local(analysis_base):
         array_indices = analysis_object['peak_arrayindex'][:]
         x_size = array_indices[:, 0].max()+1
         y_size = array_indices[:, 1].max()+1
-        valuesX = range(0, x_size)
+        valuesX = list(range(0, x_size))
         labelX = 'pixel index X'
-        valuesY = range(0, y_size)
+        valuesY = list(range(0, y_size))
         labelY = 'pixel index Y'
         if array_indices.shape[1] > 2:
             z_size = array_indices[:, 2].max()+1
-            valuesZ = range(0, z_size)
+            valuesZ = list(range(0, z_size))
             labelZ = 'pixel index Z'
         else:
             valuesZ = None
@@ -360,7 +360,7 @@ class omsi_findpeaks_local(analysis_base):
             # but we need to initiate the parallel processing.
             if msidata_subblock is None:
                 # Setup the parallel processing using mpi_helper.parallel_over_axes
-                split_axis = range(len(self['msidata'].shape)-1)  # The axes along which we can split the data
+                split_axis = list(range(len(self['msidata'].shape)-1))  # The axes along which we can split the data
                 scheduler = mpi_helper.parallel_over_axes(task_function=self.execute_analysis,  # Execute this function
                                                           task_function_params={},              # No added parameters
                                                           main_data=msidata,                    # Process the msidata
@@ -448,10 +448,10 @@ class omsi_findpeaks_local(analysis_base):
         # List describing for each pixel the start index where its peaks
         # are stored in the peaks_MZ and peaks_values array
         peak_arrayindex = np.zeros(shape=(shape_x*shape_y, 3), dtype='int64')
-        current_index = long(0)
+        current_index = int(0)
         pixel_index = 0
-        for xi in xrange(0, shape_x):
-            for yi in xrange(0, shape_y):
+        for xi in range(0, shape_x):
+            for yi in range(0, shape_y):
                 if print_status:
                     sys.stdout.write("[" + str(int(100. * float(pixel_index)/float(shape_x*shape_y))) + "%]" + "\r")
                     sys.stdout.flush()

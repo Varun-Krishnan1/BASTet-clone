@@ -17,7 +17,7 @@ def main(argv=None):
 
     # Check for correct usage
     if len(argv) < 5:
-        print "Usage: python makeThumb.py <HDF5-File> <NMF-Index1> <NMF-Index2> <NMF-Index3>"
+        print("Usage: python makeThumb.py <HDF5-File> <NMF-Index1> <NMF-Index2> <NMF-Index3>")
         sys.exit(0)
 
     # Settings
@@ -61,9 +61,9 @@ def main(argv=None):
 
     # Generate the RGB image and save the file
     thumbnail = Image.merge('RGB', (image_channel_red, image_channel_green, image_channel_blue))
-    print "Save image"
+    print("Save image")
     thumbnail.save(thumbnail_filename, 'PNG')
-    print thumbnail_filename
+    print(thumbnail_filename)
 
 
 if __name__ == "__main__":

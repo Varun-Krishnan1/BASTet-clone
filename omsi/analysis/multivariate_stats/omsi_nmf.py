@@ -100,12 +100,12 @@ class omsi_nmf(analysis_base):
         mz_slice = None
         label_slice = None
         ho_cube_shape = analysis_object['ho'].shape
-        valuesX = range(0, ho_cube_shape[0])
+        valuesX = list(range(0, ho_cube_shape[0]))
         labelX = 'pixel index X'
-        valuesY = range(0, ho_cube_shape[1])
+        valuesY = list(range(0, ho_cube_shape[1]))
         labelY = 'pixel index Y'
         if len(ho_cube_shape) > 3:
-            valuesZ = range(0, ho_cube_shape[2])
+            valuesZ = list(range(0, ho_cube_shape[2]))
             labelZ = 'pixel index Z'
         else:
             valuesZ = None

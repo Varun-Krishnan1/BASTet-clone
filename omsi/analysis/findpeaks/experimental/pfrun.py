@@ -54,13 +54,13 @@ def main(argv):
 	helpstring = "Call \"python " + thisfilename + " -h\" for help information."
 
 	if(len(argv) < 1):
-		print "Usage error! " + helpstring
+		print("Usage error! " + helpstring)
 		exit(0)
 
 	try:
 		opts, args = getopt.getopt(argv,"hf:", myparameters)
 	except getopt.GetoptError:
-		print "Parameter Error: " + helpstring
+		print("Parameter Error: " + helpstring)
 		sys.exit(2)
 
 	for opt, arg in opts:
@@ -97,17 +97,17 @@ def main(argv):
 			elif opt == "--repo":
 				myRepo = arg
 		except:
-			print "Parameter Error: " + helpstring
+			print("Parameter Error: " + helpstring)
 			exit(0)
 
 	# Open the input HDF5 file
 	if omsiInFile is None:
-		print "No OMSI file provided! " + helpstring
+		print("No OMSI file provided! " + helpstring)
 		exit(0)
 
-	print "Input file: " , omsiInFile
-	print "OMSI parameters: expIndex =", expIndex, ", dataIndex =", dataIndex
-	print "Analysis indexes: LPFIndex =", LPFIndex, ", NPGIndex =", NPGIndex
+	print("Input file: " , omsiInFile)
+	print("OMSI parameters: expIndex =", expIndex, ", dataIndex =", dataIndex)
+	print("Analysis indexes: LPFIndex =", LPFIndex, ", NPGIndex =", NPGIndex)
 	sys.stdout.flush()
 
 	# run flags
@@ -139,9 +139,9 @@ def main(argv):
 		jobname = queuePCjob(pcstring, therepo = myRepo)
 		SkipPeakCube = 1
 
-		print "Peak Cube job name:", jobname
-		print "Peak Cube queued."
-		print "Peak Cube output file: pc_job." + jobname + ".out.txt"
+		print("Peak Cube job name:", jobname)
+		print("Peak Cube queued.")
+		print("Peak Cube output file: pc_job." + jobname + ".out.txt")
 
 	# --- Peak Cube
 	if(SkipPeakCube is None and ((NPGIndex is None and SkipNPG is None) or NPGIndex is not None)):
@@ -150,12 +150,12 @@ def main(argv):
 	else:
 		PCanalysisindex = None
 
-	print "--- all complete ---"
-	print "LPF Analysis Index:", LPFanalysisindex
-	print "NPG Analysis Index:", NPGanalysisindex
-	print "PC  Analysis Index:", PCanalysisindex
-	print "Input file: " , omsiInFile
-	print "Total time: ", round((time() - totaltimekeeper) / 60, 2), "min"
+	print("--- all complete ---")
+	print("LPF Analysis Index:", LPFanalysisindex)
+	print("NPG Analysis Index:", NPGanalysisindex)
+	print("PC  Analysis Index:", PCanalysisindex)
+	print("Input file: " , omsiInFile)
+	print("Total time: ", round((time() - totaltimekeeper) / 60, 2), "min")
 
 # queue peak cube job
 def queuePCjob(pcstring, therepo = None):
@@ -166,16 +166,16 @@ def queuePCjob(pcstring, therepo = None):
 	os.close(sfd)
 
 	if not pbsCreation:
-		print "Error creating pbs script."
+		print("Error creating pbs script.")
 		exit(0)
 
-	print "\nQueueing carver peak cube job..."
+	print("\nQueueing carver peak cube job...")
 
 	qsubout = subprocess.check_output(["qsub", scriptfile])
 	myjobid = string.split(qsubout, ".")[0]
 	myjobname = string.split(qsubout, "\n")[0]
 
-	print "Job id:", myjobid
+	print("Job id:", myjobid)
 
 	# delete temporary scriptfile
 	os.remove(scriptfile)
@@ -189,7 +189,7 @@ def run_lpf(omsiInFile, expIndex, dataIndex, ph, slw, smw):
 	try:
 		omsiFile = omsi_file(omsiInFile,'r+')
 	except:
-		print "Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0]
+		print("Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0])
 		exit(0)
 
 
@@ -199,22 +199,22 @@ def run_lpf(omsiInFile, expIndex, dataIndex, ph, slw, smw):
 	peaksMZdata = data.mz[:]
 
 	# LPF --------------
-	print "\n--- Executing LPF ---"
+	print("\n--- Executing LPF ---")
 	myLPF = omsi_lpf(name_key="omsi_lpf_" + str(ctime()))
 	myLPF.execute( msidata=data, mzdata=peaksMZdata, peakheight = ph, slwindow = slw, smoothwidth = smw)
-	print "\n\nResults"
+	print("\n\nResults")
 	peaksBins = myLPF['LPF_Peaks_MZ'][:]
-	print "peaksBins:\n", peaksBins
+	print("peaksBins:\n", peaksBins)
 	peaksIntensities = myLPF['LPF_Peaks_Vals'][:]
-	print "peaksIntensities:\n", peaksIntensities
+	print("peaksIntensities:\n", peaksIntensities)
 	peaksArrayIndex = myLPF['LPF_Peaks_ArrayIndex'][:]
-	print "peaksArrayIndex:\n", peaksArrayIndex
+	print("peaksArrayIndex:\n", peaksArrayIndex)
 
-	print "\nSaving HDF5 analysis..."
+	print("\nSaving HDF5 analysis...")
 	LPFanalysis, LPFanalysisindex = exp.create_analysis(myLPF)
-	print "done!"
-	print "--- omsi_lpf complete ---\n"
-	print "LPF Analysis Index:", LPFanalysisindex
+	print("done!")
+	print("--- omsi_lpf complete ---\n")
+	print("LPF Analysis Index:", LPFanalysisindex)
 
 	# flush of lpf
 	exp.experiment.file.flush()
@@ -229,7 +229,7 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 	try:
 		omsiFile = omsi_file(omsiInFile,'r+')
 	except:
-		print "Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0]
+		print("Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0])
 		exit(0)
 
 	# Get the experiment and data
@@ -244,7 +244,7 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 	peaksMZ = peaksMZdata[peaksBins]
 
 	# NPG --------------
-	print "\n--- Executing NPG ---"
+	print("\n--- Executing NPG ---")
 	myNPG = omsi_npg(name_key="omsi_npg_" + str(ctime()))
 	#myNPG.omsi_npg_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ, MZ_TH = mzth, clusterCut = tcut)
 	myNPG.execute( peaksBins=peaksBins,
@@ -254,17 +254,17 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
                    peaksMZ=peaksMZ,
                    npg_mz_threshold=mzth,
                    npg_cluster_treecut=tcut   )
-	print "\n\nResults"
+	print("\n\nResults")
 	NPGPL = myNPG['npghc_peaks_labels']
-	print "NPG HC Peaks Labels: \n", NPGPL
+	print("NPG HC Peaks Labels: \n", NPGPL)
 	NPGLL = myNPG['npghc_labels_list']
-	print "NPG HC Labels List: \n", NPGLL
+	print("NPG HC Labels List: \n", NPGLL)
 
-	print "\nSaving HDF5 analysis..."
+	print("\nSaving HDF5 analysis...")
 	NPGanalysis, NPGanalysisindex = exp.create_analysis(myNPG)
-	print "done!"
-	print "--- omsi_npg complete ---\n"
-	print "NPG Analysis Index:", NPGanalysisindex
+	print("done!")
+	print("--- omsi_npg complete ---\n")
+	print("NPG Analysis Index:", NPGanalysisindex)
 
 	# flush of npg
 	exp.experiment.file.flush()
@@ -279,7 +279,7 @@ def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
 	try:
 		omsiFile = omsi_file(omsiInFile,'r+')
 	except:
-		print "Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0]
+		print("Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0])
 		exit(0)
 
 	# Get the experiment
@@ -295,7 +295,7 @@ def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
 	NPGPeaksLabels = NPGanalysis['npghc_peaks_labels'][:]
 	NPGLabelsList = NPGanalysis['npghc_labels_list'][:]
 
-	print "\n--- Creating Peak Cube ---"
+	print("\n--- Creating Peak Cube ---")
 	myPC = omsi_peakcube(name_key="omsi_peakcube_" + str(ctime()))
 	#myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPeaksLabels, NPGLabelsList)
 	myPC.execute( peaksBins = peaksBins,
@@ -307,15 +307,15 @@ def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
 
 
 	PCm = myPC['npg_peak_cube_mz']
-	print "NPG Peak Cube Mzs: \n", PCm.shape, "\n", PCm
+	print("NPG Peak Cube Mzs: \n", PCm.shape, "\n", PCm)
 	PMz = myPC['npg_peak_mz']
-	print "NPG Peak Mz: \n", PMz.shape, "\n", PMz
+	print("NPG Peak Mz: \n", PMz.shape, "\n", PMz)
 
-	print "\nSaving HDF5 analysis..."
+	print("\nSaving HDF5 analysis...")
 	PCanalysis, PCanalysisindex = exp.create_analysis(myPC)
-	print "done!"
-	print "--- omsi_peakcube complete ---\n"
-	print "PeakCube Analysis Index:", PCanalysisindex
+	print("done!")
+	print("--- omsi_peakcube complete ---\n")
+	print("PeakCube Analysis Index:", PCanalysisindex)
 
 
 	# flush of peakcube
@@ -365,53 +365,53 @@ def generateScript(scriptfile, PFcontent = None, repo = None):
 
 # help documentation
 def printHelp(thisfilename):
-	print "\n---------- Peak Finder Help: ----------"
-	print "To run the analysis use \"-f OMSIFile\" or \"--file=OMSIFile\", for example:"
-	print "\tpython " + thisfilename + " -f OMSIFile"
-	print "\nThis will run local and global peak finding on a particular OMSIFile"
-	print "with the default omsi file parameters:"
-	print "\texpIndex=0, dataIndex=0"
-	print "and the default local peak finding parameters:"
-	print "\tpeakheight=10, slwindow=100, smoothwidth=3"
-	print "and the default global peak finding parameters:"
-	print "\tmz_threshold=0.05, treecut=0.1"
-	print "\nIf different parameter values are desired please specify as arguments"
-	print "preceded by \"--\", for example: "
-	print "\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --smoothwidth=5"
-	print "\nNote: It is recommended to provide an appropriate peakheight parameter"
-	print "corresponding to the data properties."
-	print "\nThe program runs both LPF and NPG analysis and PeakCube generation by default."
-	print "Note that NPG analysis depends on LPF results and PeakCube generation depends"
-	print "on NPG results. If desired, one can run a specific analysis by providing the"
-	print "analysis index of its dependency in the parameters, with \"LPFIndex\" and \"NPGIndex\"."
-	print "For example, to run just the NPG analysis and PeakCube generation you can provide"
-	print "the index of the LPF analysis and call the program with:"
-	print "\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1"
-	print "\nThis will run the NPG analysis and PeakCube generation, skipping the LPF"
-	print "analysis and reading the necessary LPF data from analysis index 1 in OMSIFile."
-	print "Similarly, to run only the PeakCube generation one can call the program with:"
-	print "\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1 --NPGIndex=2"
-	print "\nTo skip a particular section of the analysis one can use the parameters \"SkipNPG\""
-	print "and \"SkipPeakCube\". For example, to run just the LPF analysis without NPG,"
-	print "one can call:"
-	print "\n\tpython " + thisfilename + " -f OMSIFile --SkipNPG"
-	print "\nOr to run both LPF and NPG but not the PeakCube generation, call:"
-	print "\n\tpython " + thisfilename + " -f OMSIFile --SkipPeakCube"
-	print "\nNote that PeakCube generation not be performed if \"SkipNPG\" is enabled. If this"
-	print "is not desired then use the \"NPGIndex\" parameter instead."
-	print "\nBy default, the PeakCube generation is done interactively. Optionally, to queue"
-	print "it as a carver big memory job use the parameter 'QueuePeakCube'. For example:"
-	print "\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --QueuePeakCube"
-	print "\nThis will run the LPF and NPG analysis and then queue the PeakCube generation."
-	print "To see the output of the job open the indicated file with prefix 'pc_job'. For"
-	print "example:"
-	print "\n\t'pc_job.JOBID.cvrsvc09-ib.out.txt'"
-	print "\nThe output file will be available once the job is complete."
-	print "---------------------------------------"
+	print("\n---------- Peak Finder Help: ----------")
+	print("To run the analysis use \"-f OMSIFile\" or \"--file=OMSIFile\", for example:")
+	print("\tpython " + thisfilename + " -f OMSIFile")
+	print("\nThis will run local and global peak finding on a particular OMSIFile")
+	print("with the default omsi file parameters:")
+	print("\texpIndex=0, dataIndex=0")
+	print("and the default local peak finding parameters:")
+	print("\tpeakheight=10, slwindow=100, smoothwidth=3")
+	print("and the default global peak finding parameters:")
+	print("\tmz_threshold=0.05, treecut=0.1")
+	print("\nIf different parameter values are desired please specify as arguments")
+	print("preceded by \"--\", for example: ")
+	print("\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --smoothwidth=5")
+	print("\nNote: It is recommended to provide an appropriate peakheight parameter")
+	print("corresponding to the data properties.")
+	print("\nThe program runs both LPF and NPG analysis and PeakCube generation by default.")
+	print("Note that NPG analysis depends on LPF results and PeakCube generation depends")
+	print("on NPG results. If desired, one can run a specific analysis by providing the")
+	print("analysis index of its dependency in the parameters, with \"LPFIndex\" and \"NPGIndex\".")
+	print("For example, to run just the NPG analysis and PeakCube generation you can provide")
+	print("the index of the LPF analysis and call the program with:")
+	print("\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1")
+	print("\nThis will run the NPG analysis and PeakCube generation, skipping the LPF")
+	print("analysis and reading the necessary LPF data from analysis index 1 in OMSIFile.")
+	print("Similarly, to run only the PeakCube generation one can call the program with:")
+	print("\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1 --NPGIndex=2")
+	print("\nTo skip a particular section of the analysis one can use the parameters \"SkipNPG\"")
+	print("and \"SkipPeakCube\". For example, to run just the LPF analysis without NPG,")
+	print("one can call:")
+	print("\n\tpython " + thisfilename + " -f OMSIFile --SkipNPG")
+	print("\nOr to run both LPF and NPG but not the PeakCube generation, call:")
+	print("\n\tpython " + thisfilename + " -f OMSIFile --SkipPeakCube")
+	print("\nNote that PeakCube generation not be performed if \"SkipNPG\" is enabled. If this")
+	print("is not desired then use the \"NPGIndex\" parameter instead.")
+	print("\nBy default, the PeakCube generation is done interactively. Optionally, to queue")
+	print("it as a carver big memory job use the parameter 'QueuePeakCube'. For example:")
+	print("\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --QueuePeakCube")
+	print("\nThis will run the LPF and NPG analysis and then queue the PeakCube generation.")
+	print("To see the output of the job open the indicated file with prefix 'pc_job'. For")
+	print("example:")
+	print("\n\t'pc_job.JOBID.cvrsvc09-ib.out.txt'")
+	print("\nThe output file will be available once the job is complete.")
+	print("---------------------------------------")
 
 # stop python
 def stop():
-	raw_input("Stop!")
+	input("Stop!")
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

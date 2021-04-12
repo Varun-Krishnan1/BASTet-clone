@@ -77,7 +77,7 @@ class omsi_metadata_collection_manager(omsi_file_object_manager):
             h5py_group = use_omsi_object['/']
 
         if h5py_group is not None:
-            for h5py_name, h5py_value in h5py_group.iteritems():
+            for h5py_name, h5py_value in h5py_group.items():
                 curr_omsi_object = omsi_file_common.get_omsi_object(h5py_value)
                 if isinstance(curr_omsi_object, omsi_file_metadata_collection):
                     if name is None or h5py_name == name:
@@ -184,7 +184,7 @@ class omsi_file_metadata_collection(omsi_file_common):
             group_name is not None else \
             omsi_format_metadata_collection.metadata_collection_groupname_default
         # out_metadata_collection = None   # Created in both if and else block
-        if metadata_group_name in parent_group.keys():
+        if metadata_group_name in list(parent_group.keys()):
             out_metadata_collection = omsi_file_metadata_collection(metadata_group=parent_group[metadata_group_name])
             out_metadata_collection.add_metadata(metadata)
             if flush_io:
@@ -238,7 +238,7 @@ class omsi_file_metadata_collection(omsi_file_common):
 
         :return: List of string with the metadata keys
         """
-        return self.managed_group.keys()
+        return list(self.managed_group.keys())
 
     def values(self):
         """
@@ -250,7 +250,7 @@ class omsi_file_metadata_collection(omsi_file_common):
 
         :return: List of `omsi.shared.metadata_data.metadata_value` with all metadata
         """
-        return self.get_metadata(key=None).values()
+        return list(self.get_metadata(key=None).values())
 
     def get_metadata(self, key=None):
         """
@@ -272,7 +272,7 @@ class omsi_file_metadata_collection(omsi_file_common):
         isjson_attr = omsi_format_metadata_collection.is_json_dict_attribute
         if key is None:
             output_meta_dict = metadata_dict()
-            for metadata_name, metadata_dataset in self.managed_group.iteritems():
+            for metadata_name, metadata_dataset in self.managed_group.items():
                 unit = None if unit_attr not in metadata_dataset.attrs else metadata_dataset.attrs[unit_attr]
                 description = None if descr_attr not in metadata_dataset.attrs else metadata_dataset.attrs[descr_attr]
                 ontology = None if ontology_attr not in metadata_dataset.attrs else \
@@ -316,16 +316,16 @@ class omsi_file_metadata_collection(omsi_file_common):
             return
 
         if isinstance(metadata,  metadata_dict):
-            for metadata_val in metadata.values():
+            for metadata_val in list(metadata.values()):
                 self.add_metadata(metadata_val)
             return
 
         metadata_dataset = None
-        if isinstance(metadata['value'], basestring):
-            metadata_dataset = self.managed_group.require_dataset(name=unicode(metadata['name']),
+        if isinstance(metadata['value'], str):
+            metadata_dataset = self.managed_group.require_dataset(name=str(metadata['name']),
                                                                   shape=(1,),
                                                                   dtype=omsi_format_common.str_type)
-            metadata_dataset[0] = unicode(metadata['value']) if \
+            metadata_dataset[0] = str(metadata['value']) if \
                 omsi_format_common.str_type_unicode else \
                 str(metadata['value'])
         else:
@@ -364,6 +364,6 @@ class omsi_file_metadata_collection(omsi_file_common):
             if metadata['unit'] is not None:
                 metadata_dataset.attrs[omsi_format_metadata_collection.unit_value_attribute] = metadata['unit']
             if metadata['ontology'] is not None:
-                ontology_value = metadata['ontology'] if isinstance(metadata['ontology'], basestring) \
+                ontology_value = metadata['ontology'] if isinstance(metadata['ontology'], str) \
                     else json.dumps(metadata['ontology'])
                 metadata_dataset.attrs[omsi_format_metadata_collection.ontology_value_attribute] = ontology_value

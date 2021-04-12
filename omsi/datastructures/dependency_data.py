@@ -91,7 +91,7 @@ class dependency_dict(dict):
         :return: dependency_dict object
         """
         new_dependency = dependency_dict()
-        for key, value in self.iteritems():
+        for key, value in self.items():
             if key == '_data':
                 new_dependency._force_set_data(value)
             else:
@@ -115,7 +115,7 @@ class dependency_dict(dict):
                     parent = value.parent
                     if omsi_file_common.is_managed(parent):
                         dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(parent))
-                        dict.__setitem__(self, 'dataname', unicode(value.name.split('/')[-1]))
+                        dict.__setitem__(self, 'dataname', str(value.name.split('/')[-1]))
                         # print super(dependency_dict,self).__str__()
                     else:
                         warnings.warn("The generated dependency does not point to a managed object.")
@@ -128,33 +128,33 @@ class dependency_dict(dict):
                                      " invalid omsi_object parameter for " +
                                      "dependency_dict without valid data dependency.")
             elif key == 'selection':
-                if value is None or (isinstance(value, basestring) and len(value) == 0):
+                if value is None or (isinstance(value, str) and len(value) == 0):
                     new_value = None
                 else:
                     from omsi.shared.data_selection import selection_to_string
-                    new_value = unicode(selection_to_string(selection=value))
+                    new_value = str(selection_to_string(selection=value))
                 dict.__setitem__(self, key, new_value)
                 dict.__setitem__(self, '_data', None)  # Any previously loaded data may be invalid (delete)
             elif key == 'dataname':
-                if not isinstance(value, basestring):
+                if not isinstance(value, str):
                     raise ValueError('Dataname must be a string')
-                dict.__setitem__(self, 'dataname', unicode(value))
+                dict.__setitem__(self, 'dataname', str(value))
                 dict.__setitem__(self, '_data', None)  # Any previously loaded data may be invalid (delete)
             elif key == 'param_name':
-                if not isinstance(value, basestring):
+                if not isinstance(value, str):
                     raise ValueError('param_name must be a string')
-                dict.__setitem__(self, 'param_name', unicode(value))
+                dict.__setitem__(self, 'param_name', str(value))
             elif key == 'link_name':
-                if not isinstance(value, basestring):
+                if not isinstance(value, str):
                     raise ValueError('link_name must be a string')
-                dict.__setitem__(self, 'link_name', unicode(value))
+                dict.__setitem__(self, 'link_name', str(value))
             elif key == '_data':
                 raise KeyError('_data key is managed by dependency_dict. Explicit definition of _data not permitted.')
             elif key == 'help':
-                if isinstance(value, basestring):
-                    dict.__setitem__(self, 'help', unicode(value))
+                if isinstance(value, str):
+                    dict.__setitem__(self, 'help', str(value))
             elif key == 'dependency_type':
-                if value in self.dependency_types.values():
+                if value in list(self.dependency_types.values()):
                     dict.__setitem__(self, 'dependency_type', value)
                 else:
                     raise ValueError('Unknown dependency type specified. Valid types are: ' +
@@ -177,7 +177,7 @@ class dependency_dict(dict):
            :returns: Value. May return a dependency_dict if the selection refers to the data object and the
                 dependency cannot be resolved yet.
         """
-        if key in self.keys():
+        if key in list(self.keys()):
             return dict.__getitem__(self, key)
         else:
             data_ref = self.get_data()

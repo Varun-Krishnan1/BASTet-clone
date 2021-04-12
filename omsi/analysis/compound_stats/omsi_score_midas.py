@@ -107,7 +107,7 @@ class omsi_score_midas(analysis_base):
                            help='Scheduling to be used for parallel MPI runs',
                            dtype=str,
                            required=False,
-                           choices=mpi_helper.parallel_over_axes.SCHEDULES.values(),
+                           choices=list(mpi_helper.parallel_over_axes.SCHEDULES.values()),
                            group=groups['parallel'],
                            default=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
         self.add_parameter(name='collect',
@@ -260,7 +260,7 @@ class omsi_score_midas(analysis_base):
             # Skip empty spectra
             if spectrum_length == 0:
                 time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored."
-                print time_str
+                print(time_str)
                 continue
             # Load the m/z and intensity values for the current spectrum
             current_peaks_list = np.zeros(shape=(spectrum_length, 3), dtype=float)
@@ -290,7 +290,7 @@ class omsi_score_midas(analysis_base):
             execution_time = end_time - start_time
             time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
             time_str += " : num hits : " + str(current_hits.shape[0])
-            print time_str
+            print(time_str)
             sys.stdout.flush()
 
             # Initialize the hit_table if necessary

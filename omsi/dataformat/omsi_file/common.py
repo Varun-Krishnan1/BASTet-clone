@@ -252,7 +252,7 @@ class omsi_file_common(object):
         # If we have an hpy.Dataset then we don't have a corresponding API object. Return as is
         elif isinstance(h5py_object, h5py.Dataset):
             return h5py_object
-        elif isinstance(h5py_object, basestring):
+        elif isinstance(h5py_object, str):
             import os
             filename, object_path = cls.parse_path_string(h5py_object)
             if filename is not None and os.path.exists(filename) and os.path.isfile(filename):
@@ -291,7 +291,7 @@ class omsi_file_common(object):
 
         :raises: ValueError in case that an invalid string is given
         """
-        if not isinstance(path, basestring):
+        if not isinstance(path, str):
             raise ValueError('The given path is not a string.')
         file_path = None
         object_path = None
@@ -378,7 +378,7 @@ class omsi_file_common(object):
         """
         numitems = 0
         # Iterate through all groups of the root folder
-        for item_obj in file_group.items():
+        for item_obj in list(file_group.items()):
             if item_obj[0].startswith(basename):
                 numitems += 1
         return numitems
@@ -394,8 +394,8 @@ class omsi_file_common(object):
         Support direct write interaction with the method h5py group.
         """
         # If the version of h5py does not support automatic storage of strings and we have a string then do-it-yourself
-        if (isinstance(value, unicode) or isinstance(value, str)) and not omsi_format_common.str_type_unicode:
-            key_dataset = self.managed_group.require_dataset(name=unicode(key),
+        if (isinstance(value, str) or isinstance(value, str)) and not omsi_format_common.str_type_unicode:
+            key_dataset = self.managed_group.require_dataset(name=str(key),
                                                              shape=(1,),
                                                              dtype=omsi_format_common.str_type)
             key_dataset[0] = str(value)
@@ -458,4 +458,4 @@ class omsi_file_common(object):
         """
         Get the list of items associdated with the h5py.Group object managed by this object
         """
-        return self.managed_group.items()
+        return list(self.managed_group.items())

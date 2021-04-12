@@ -60,7 +60,7 @@ class omsi_instrument_manager(omsi_metadata_collection_manager):
                    None in case no instrument information was found for the experiment
         """
         try:
-            return omsi_file_instrument(self.instrument_parent[unicode(omsi_format_instrument.instrument_groupname)])
+            return omsi_file_instrument(self.instrument_parent[str(omsi_format_instrument.instrument_groupname)])
         except KeyError:
             # Check whether the parent group has information about the instrument
             if check_parent:
@@ -199,7 +199,7 @@ class omsi_file_instrument(omsi_file_metadata_collection):
         if self.managed_group is None:
             return None
         try:
-            instrument_name = self.managed_group[unicode(omsi_format_instrument.instrument_name)]
+            instrument_name = self.managed_group[str(omsi_format_instrument.instrument_name)]
         except KeyError:
             instrument_name = None
         return instrument_name
@@ -217,7 +217,7 @@ class omsi_file_instrument(omsi_file_metadata_collection):
         if self.managed_group is None:
             return None
         try:
-            return self.managed_group[unicode(omsi_format_instrument.instrument_mz_name)]
+            return self.managed_group[str(omsi_format_instrument.instrument_mz_name)]
         except KeyError:
             return None
 

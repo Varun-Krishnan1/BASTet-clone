@@ -82,10 +82,10 @@ class omsi_mz_upsample(omsi_analysis_base):
 
         # decide whether to use new_mzdata or new_spacing
         if new_mzdata.shape == (0,) and new_spacing == 0:
-            print "at least one of new_mzdata and new_spacing must be specified"
+            print("at least one of new_mzdata and new_spacing must be specified")
             raise Exception
         elif new_mzdata.shape != (0,) and new_spacing != 0:
-            print "Cannot define both new_mzdata and new_spacing"
+            print("Cannot define both new_mzdata and new_spacing")
             raise Exception
         elif new_mzdata.shape == (0,):       # if using new_spacing, form new_mzdata vector
             minmz = np.min(mzdata)
@@ -98,8 +98,8 @@ class omsi_mz_upsample(omsi_analysis_base):
         mindiff_old = np.min(np.diff(mzdata))
         maxdiff_new = np.max(np.diff(new_mzdata))
         if mindiff_old < maxdiff_new:
-            print """This function is meant only for upsampling, not downsampling, but your new m/z axis
-                        is more widely spaced than the existing one at at least some m/z regions"""
+            print("""This function is meant only for upsampling, not downsampling, but your new m/z axis
+                        is more widely spaced than the existing one at at least some m/z regions""")
             raise Exception
 
         # do upsampling

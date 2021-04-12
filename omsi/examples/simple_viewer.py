@@ -15,9 +15,9 @@ class MyViewer :
                           may be None in case the mz data is unknown
         """
         #Compute the reference image using the full dataset
-        print "Computing max projection of all spectra"
+        print("Computing max projection of all spectra")
         maxVal = np.max( data[:,:,:] , axis=2 )
-        print "Initalizing plots"
+        print("Initalizing plots")
         #Create plot of the physical image
         self.hdfdata = data
         self.mzdata = mzdata
@@ -35,7 +35,7 @@ class MyViewer :
             self.curveFig.set_xlim( np.min( self.mzdata ) , np.max( self.mzdata) )
             self.curveFig.set_xlabel("m/z")
         self.imageFig.figure.canvas.mpl_connect( 'button_press_event' , self)
-        print "Done creating the view"
+        print("Done creating the view")
    
     def __call__(self, event ):   
         """Callback function used to update the curve plot when clicking on the image plot"""
@@ -60,11 +60,11 @@ def main(argv=None):
    
     #Check for correct usage
     if len(argv) <2 :
-        print "USAGE: Call \"omsiHDF5File [expIndex dataIndex]   \" "
-        print "\n"
-        print "This is a simple viewer for looking at OMSI HDF5 files."
-        print "The viewer takes the index of the experiment and the"
-        print "dataset to be used as optional input"
+        print("USAGE: Call \"omsiHDF5File [expIndex dataIndex]   \" ")
+        print("\n")
+        print("This is a simple viewer for looking at OMSI HDF5 files.")
+        print("The viewer takes the index of the experiment and the")
+        print("dataset to be used as optional input")
         exit(0)
 
     #Read the input arguments 
@@ -79,7 +79,7 @@ def main(argv=None):
     try:
         omsiFile = omsi_file( omsiOutFile , 'r' ) #Open file in read only mode
     except:
-        print "Unexpected error creating the output file:", sys.exc_info()[0]
+        print("Unexpected error creating the output file:", sys.exc_info()[0])
         exit(0)
 
     #Get the experiment and dataset
@@ -88,7 +88,7 @@ def main(argv=None):
     mzdata = exp.get_instrument_info().get_instrument_mz()    
 
     if data is None:
-        print "Could not access image data for the experiment"
+        print("Could not access image data for the experiment")
         exit(0)
 
     #Initalize the viewer

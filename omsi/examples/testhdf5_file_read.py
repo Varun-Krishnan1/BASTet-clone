@@ -34,7 +34,7 @@ def main(argv=None):
         loaddata = d[xmin:xmax , ymin:ymax, zmin:zmax]
         #content = json.dumps( loaddata.tolist() )
         stop = (time.time() - start) 
-        print stop
+        print(stop)
         exit(0)
     
     import numpy as np
@@ -94,10 +94,10 @@ def main(argv=None):
 
     #Compute the slice query test
     for filename in filelist :
-        print filename+" 25 mz-slices"
+        print(filename+" 25 mz-slices")
         #mz-slice selection 250,000 elements
         sliceWidthZ = 25 #xdim=100 , ydim=100
-        for ri in xrange( 0 , repeats ) :
+        for ri in range( 0 , repeats ) :
 
             xmin = 0
             xmax = data_shapes[filename][0]
@@ -112,15 +112,15 @@ def main(argv=None):
             stop = (time.time() - start)
             results[filename]['mz-slice'][ri] = readTime
             results[filename]['mz-slice-all'][ri] = stop
-            print str(results[filename]['mz-slice'][ri]) + "   " +str( results[filename]['mz-slice-all'][ri] )+ " " + str(xmin) + " " + str(xmax) + " " + str(ymin) + " " + str(ymax) + " " + str(zmin)  + " " + str(zmax)
+            print(str(results[filename]['mz-slice'][ri]) + "   " +str( results[filename]['mz-slice-all'][ri] )+ " " + str(xmin) + " " + str(xmax) + " " + str(ymin) + " " + str(ymax) + " " + str(zmin)  + " " + str(zmax))
 
     #Compute the spectra test
     for filename in filelist :
-        print filename+" 3 x 3  spectra"
+        print(filename+" 3 x 3  spectra")
         #mz-slice selection 250,000 elements
         sliceWidthX = 3 
         sliceWidthY = 3
-        for ri in xrange( 0 , repeats ) :
+        for ri in range( 0 , repeats ) :
 
             xmin = random.randint(0, data_shapes[filename][0]-sliceWidthX-1 )
             xmax = xmin + sliceWidthX
@@ -135,16 +135,16 @@ def main(argv=None):
             stop = (time.time() - start)
             results[filename]['spectrum'][ri] = readTime
             results[filename]['spectrum-all'][ri] = stop
-            print str(results[filename]['spectrum'][ri]) + "   " +str( results[filename]['spectrum-all'][ri] )+ " " + str(xmin) + " " + str(xmax) + " " + str(ymin) + " " + str(ymax) + " " + str(zmin)  + " " + str(zmax)
+            print(str(results[filename]['spectrum'][ri]) + "   " +str( results[filename]['spectrum-all'][ri] )+ " " + str(xmin) + " " + str(xmax) + " " + str(ymin) + " " + str(ymax) + " " + str(zmin)  + " " + str(zmax))
 
     #Compte the cube test 
     for filename in filelist :
-        print filename+" 20 x 20 x 1000  cube"
+        print(filename+" 20 x 20 x 1000  cube")
         #mz-slice selection 250,000 elements
         sliceWidthX = 20
         sliceWidthY = 20
         sliceWidthZ = 1000
-        for ri in xrange( 0 , repeats ) :
+        for ri in range( 0 , repeats ) :
 
             xmin = random.randint(0, data_shapes[filename][0]-sliceWidthX-1 )
             xmax = xmin + sliceWidthX
@@ -159,7 +159,7 @@ def main(argv=None):
             stop = (time.time() - start)
             results[filename]['xyz-cube'][ri] = readTime
             results[filename]['xyz-cube-all'][ri] = stop
-            print str(results[filename]['xyz-cube'][ri]) + "   " +str( results[filename]['xyz-cube-all'][ri] )+ " " + str(xmin) + " " + str(xmax) + " " + str(ymin) + " " + str(ymax) + " " + str(zmin)  + " " + str(zmax)
+            print(str(results[filename]['xyz-cube'][ri]) + "   " +str( results[filename]['xyz-cube-all'][ri] )+ " " + str(xmin) + " " + str(xmax) + " " + str(ymin) + " " + str(ymax) + " " + str(zmin)  + " " + str(zmax))
     
     for filename in filelist :
         
@@ -179,8 +179,8 @@ def main(argv=None):
 def printHelp():
     """Print the help explaining the usage of testHDF5Optimiation"""
     
-    print "USAGE: Call \"testhdf5_file_read resultsFile\" "
-    print "Execute query: testhdf5_file_read filename xmin xmax ymin ymax zmin zmax"
+    print("USAGE: Call \"testhdf5_file_read resultsFile\" ")
+    print("Execute query: testhdf5_file_read filename xmin xmax ymin ymax zmin zmax")
 
 
 if __name__ == "__main__":

@@ -60,10 +60,10 @@ class omsi_methods_manager(omsi_metadata_collection_manager):
         """
         if self.method_parent is not None:
             try:
-                return omsi_file_methods(self.method_parent[unicode(omsi_format_methods.methods_groupname)])
+                return omsi_file_methods(self.method_parent[str(omsi_format_methods.methods_groupname)])
             except KeyError:
                 try:
-                    return omsi_file_methods(self.method_parent[unicode(omsi_format_methods.methods_old_groupname)])
+                    return omsi_file_methods(self.method_parent[str(omsi_format_methods.methods_old_groupname)])
                 except KeyError:
                     if check_parent:
                         return omsi_file_common.get_omsi_object(self.method_parent.parent).get_method_info()
@@ -199,7 +199,7 @@ class omsi_file_methods(omsi_file_metadata_collection):
         if self.managed_group is None:
             return None
         try:
-            method_name = self.managed_group[unicode(omsi_format_methods.methods_name)]
+            method_name = self.managed_group[str(omsi_format_methods.methods_name)]
         except KeyError:
             method_name = None
         return method_name

@@ -50,13 +50,13 @@ def main(argv):
     helpstring = "Call \"python " + thisfilename + " -h\" for help information."
 
     if (len(argv) < 1):
-        print "Usage error! " + helpstring
+        print("Usage error! " + helpstring)
         exit(0)
 
     try:
         opts, args = getopt.getopt(argv, "hf:", myparameters)
     except getopt.GetoptError:
-        print "Parameter Error: " + helpstring
+        print("Parameter Error: " + helpstring)
         sys.exit(2)
 
     for opt, arg in opts:
@@ -93,15 +93,15 @@ def main(argv):
             elif opt == "--repo":
                 myRepo = arg
         except:
-            print "Parameter Error: " + helpstring
+            print("Parameter Error: " + helpstring)
             exit(0)
 
     # Open the input HDF5 file
     if omsiInFile is None:
-        print "No OMSI file provided! " + helpstring
+        print("No OMSI file provided! " + helpstring)
         exit(0)
     else:
-        print "OMSI file:", omsiInFile
+        print("OMSI file:", omsiInFile)
 
     # python call strings
     pfstring = "python " + driverfilename + " -f " + omsiInFile + " --expIndex=" + str(
@@ -122,7 +122,7 @@ def main(argv):
     # all in one
     PFcmd = getPFcmd(pfstring, lpfstring, npgstring, LPFIndex, NPGIndex, SkipNPG, SkipPeakCube)
     if not PFcmd:
-        print "Parameter Error: " + helpstring
+        print("Parameter Error: " + helpstring)
         exit(0)
 
 
@@ -132,43 +132,43 @@ def main(argv):
     os.close(sfd)
 
     if not pbsCreation:
-        print "Error creating pbs script."
+        print("Error creating pbs script.")
         exit(0)
 
-    print "PBS script created:", scriptfile
-    print "Queueing job..."
+    print("PBS script created:", scriptfile)
+    print("Queueing job...")
 
     qsubout = subprocess.check_output(["qsub", scriptfile])
     PFjobid = string.split(qsubout, ".")[0]
     PFjobname = string.split(qsubout, "\n")[0]
 
-    print "Job id:", PFjobid
+    print("Job id:", PFjobid)
 
     # delete temporary scriptfile
     os.remove(scriptfile)
 
     if (monitor):
-        print "\n[PF Monitoring start]"
+        print("\n[PF Monitoring start]")
 
         PCjobname = monitorJob(PFjobid, PFjobname, runtype="pf")
 
-        print "\n[PF Monitoring complete]"
+        print("\n[PF Monitoring complete]")
 
         if (PCjobname is not None):
-            print "\n[Peak Cube Monitoring start]"
+            print("\n[Peak Cube Monitoring start]")
             PCjobid = string.split(PCjobname, ".")[0]
             PCresult = monitorJob(PCjobid, PCjobname, runtype="pc")
-            print "\n[Peak Cube Monitoring complete]"
+            print("\n[Peak Cube Monitoring complete]")
 
     if (PFjobname is not None or PCjobname is not None):
         if (PFjobname):
-            print "Peak finding output file: pf_job." + PFjobname + ".out.txt"
+            print("Peak finding output file: pf_job." + PFjobname + ".out.txt")
         if (PCjobname):
-            print "Peak cube output file: pc_job." + PCjobname + ".out.txt"
+            print("Peak cube output file: pc_job." + PCjobname + ".out.txt")
         elif (runpc):
-            print "Peak cube output file: [To be queued] check 'pf_job." + PFjobname + ".out.txt' after peak finding is complete."
+            print("Peak cube output file: [To be queued] check 'pf_job." + PFjobname + ".out.txt' after peak finding is complete.")
 
-    print "--- fin ---"
+    print("--- fin ---")
 
 
 # +++++++++++++++++++++++ helper functions ++++++++++++++++++++++++++
@@ -187,7 +187,7 @@ def monitorJob(jobid, jobname, runtype="pf"):
     ioerrorcount = 0
     ioerrormax = 3  # tolerance amount for error in reading output file. More attempts than this will stop monitoring
 
-    print "Waiting for job to start...",
+    print("Waiting for job to start...", end=' ')
     sys.stdout.flush()
 
     while (jobisrunning == False):
@@ -201,11 +201,11 @@ def monitorJob(jobid, jobname, runtype="pf"):
 
         if (runresult1 != -1 or runresult2 != -1):
             jobisrunning = True
-            print "\nJob is running..."
+            print("\nJob is running...")
         else:
             sleep(checkjobsleep)
 
-    print "--- [job output start] ---"
+    print("--- [job output start] ---")
 
     while (keepmonitoring):
 
@@ -213,7 +213,7 @@ def monitorJob(jobid, jobname, runtype="pf"):
 
         if (joboutput is None):
             if (ioerrorcount > ioerrormax):
-                print "Error reading outputfile for job:", jobid
+                print("Error reading outputfile for job:", jobid)
                 keepmonitoring = False
             else:
                 ioerrorcount += 1
@@ -221,7 +221,7 @@ def monitorJob(jobid, jobname, runtype="pf"):
         else:
             lineamt = len(joboutput) - currentline
 
-            for i in xrange(lineamt):
+            for i in range(lineamt):
                 thisline = joboutput[currentline]
 
                 # check for incomplete analysis line
@@ -229,14 +229,14 @@ def monitorJob(jobid, jobname, runtype="pf"):
                     startlpfline = string.find(thisline, "smooth - done")
                     endlpfline = string.find(thisline, "peakdet - done")
                     if (startlpfline != -1 and endlpfline != -1):
-                        print thisline,
+                        print(thisline, end=' ')
                     elif (thisline[-1] == '\r'):
-                        print thisline[0:-1] + '\r',
+                        print(thisline[0:-1] + '\r', end=' ')
                         currentline -= 1
                     else:
                         currentline -= 1
                 else:
-                    print thisline,
+                    print(thisline, end=' ')
 
                 foundpc = string.find(thisline, pcskeystring)
                 if (foundpc != -1):
@@ -252,7 +252,7 @@ def monitorJob(jobid, jobname, runtype="pf"):
             if (keepmonitoring):
                 sleep(filereadsleep)
 
-    print "\n--- [job output complete] ---"
+    print("\n--- [job output complete] ---")
     return PCjobname
 
 
@@ -380,57 +380,57 @@ def generateScript(scriptfile, PFcontent=None, repo=None):
 
 # help documentation
 def printHelp(thisfilename):
-    print "\n---------- Peak Finder Help: ----------"
-    print "To run the analysis use \"-f OMSIFile\" or \"--file=OMSIFile\", for example:"
-    print "\tpython " + thisfilename + " -f OMSIFile"
-    print "\nThis will run local and global peak finding on a particular OMSIFile"
-    print "with the default omsi file parameters:"
-    print "\texpIndex=0, dataIndex=0"
-    print "and the default local peak finding parameters:"
-    print "\tpeakheight=10, slwindow=100, smoothwidth=3"
-    print "and the default global peak finding parameters:"
-    print "\tmz_threshold=0.05, treecut=0.1"
-    print "\nIf different parameter values are desired please specify as arguments"
-    print "preceded by \"--\", for example: "
-    print "\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --smoothwidth=5"
-    print "\nNote: It is recommended to provide an appropriate peakheight parameter"
-    print "corresponding to the data properties."
-    print "\nThe program runs both LPF and NPG analysis and PeakCube generation by default."
-    print "Note that NPG analysis depends on LPF results and PeakCube generation depends"
-    print "on NPG results. If desired, one can run a specific analysis by providing the"
-    print "analysis index of its dependency in the parameters, with \"LPFIndex\" and \"NPGIndex\"."
-    print "For example, to run just the NPG analysis and PeakCube generation you can provide"
-    print "the index of the LPF analysis and call the program with:"
-    print "\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1"
-    print "\nThis will run the NPG analysis and PeakCube generation, skipping the LPF"
-    print "analysis and reading the necessary LPF data from analysis index 1 in OMSIFile."
-    print "Similarly, to run only the PeakCube generation one can call the program with:"
-    print "\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1 --NPGIndex=2"
-    print "\nTo skip a particular section of the analysis one can use the parameters \"SkipNPG\""
-    print "and \"SkipPeakCube\". For example, to run just the LPF analysis without NPG,"
-    print "one can call:"
-    print "\n\tpython " + thisfilename + " -f OMSIFile --SkipNPG"
-    print "\nOr to run both LPF and NPG but not the PeakCube generation, call:"
-    print "\n\tpython " + thisfilename + " -f OMSIFile --SkipPeakCube"
-    print "\nNote that PeakCube generation not be performed if \"SkipNPG\" is enabled. If this"
-    print "is not desired then use the \"NPGIndex\" parameter instead."
-    print "\nThe output can be monitored by using the --monitor flag. This will read the"
-    print "output files generated by dirac and carver jobs. For example:"
-    print "\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --monitor"
-    print "\nIf the monitor flag is not used, the output will be written in the current working"
-    print "directory with the prefix 'pf_job' for LPF and NPG analysis and 'pc_job' for peak"
-    print "cube generation. For example:"
-    print "\n\t'pf_job.JOBID.cvrsvc09-ib.out.txt' and 'pc_job.JOBID.cvrsvc09-ib.out.txt'"
-    print "\nThis file queues a job in dirac for lpf and npg analysis and the dirac job can queue"
-    print "a big memory job in carver if the peak cube will be generated. The monitoring can be"
-    print "performed by reading each job output file. Temporary files are created to generate"
-    print "customized pbs scripts and then removed once the job is queued."
-    print "---------------------------------------"
+    print("\n---------- Peak Finder Help: ----------")
+    print("To run the analysis use \"-f OMSIFile\" or \"--file=OMSIFile\", for example:")
+    print("\tpython " + thisfilename + " -f OMSIFile")
+    print("\nThis will run local and global peak finding on a particular OMSIFile")
+    print("with the default omsi file parameters:")
+    print("\texpIndex=0, dataIndex=0")
+    print("and the default local peak finding parameters:")
+    print("\tpeakheight=10, slwindow=100, smoothwidth=3")
+    print("and the default global peak finding parameters:")
+    print("\tmz_threshold=0.05, treecut=0.1")
+    print("\nIf different parameter values are desired please specify as arguments")
+    print("preceded by \"--\", for example: ")
+    print("\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --smoothwidth=5")
+    print("\nNote: It is recommended to provide an appropriate peakheight parameter")
+    print("corresponding to the data properties.")
+    print("\nThe program runs both LPF and NPG analysis and PeakCube generation by default.")
+    print("Note that NPG analysis depends on LPF results and PeakCube generation depends")
+    print("on NPG results. If desired, one can run a specific analysis by providing the")
+    print("analysis index of its dependency in the parameters, with \"LPFIndex\" and \"NPGIndex\".")
+    print("For example, to run just the NPG analysis and PeakCube generation you can provide")
+    print("the index of the LPF analysis and call the program with:")
+    print("\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1")
+    print("\nThis will run the NPG analysis and PeakCube generation, skipping the LPF")
+    print("analysis and reading the necessary LPF data from analysis index 1 in OMSIFile.")
+    print("Similarly, to run only the PeakCube generation one can call the program with:")
+    print("\n\tpython " + thisfilename + " -f OMSIFile --LPFIndex=1 --NPGIndex=2")
+    print("\nTo skip a particular section of the analysis one can use the parameters \"SkipNPG\"")
+    print("and \"SkipPeakCube\". For example, to run just the LPF analysis without NPG,")
+    print("one can call:")
+    print("\n\tpython " + thisfilename + " -f OMSIFile --SkipNPG")
+    print("\nOr to run both LPF and NPG but not the PeakCube generation, call:")
+    print("\n\tpython " + thisfilename + " -f OMSIFile --SkipPeakCube")
+    print("\nNote that PeakCube generation not be performed if \"SkipNPG\" is enabled. If this")
+    print("is not desired then use the \"NPGIndex\" parameter instead.")
+    print("\nThe output can be monitored by using the --monitor flag. This will read the")
+    print("output files generated by dirac and carver jobs. For example:")
+    print("\n\tpython " + thisfilename + " -f OMSIFile --peakheight=15 --monitor")
+    print("\nIf the monitor flag is not used, the output will be written in the current working")
+    print("directory with the prefix 'pf_job' for LPF and NPG analysis and 'pc_job' for peak")
+    print("cube generation. For example:")
+    print("\n\t'pf_job.JOBID.cvrsvc09-ib.out.txt' and 'pc_job.JOBID.cvrsvc09-ib.out.txt'")
+    print("\nThis file queues a job in dirac for lpf and npg analysis and the dirac job can queue")
+    print("a big memory job in carver if the peak cube will be generated. The monitoring can be")
+    print("performed by reading each job output file. Temporary files are created to generate")
+    print("customized pbs scripts and then removed once the job is queued.")
+    print("---------------------------------------")
 
 
 # stop python
 def stop():
-    raw_input("Stop!")
+    input("Stop!")
 
 
 if __name__ == "__main__":

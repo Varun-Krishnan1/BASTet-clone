@@ -71,7 +71,7 @@ class omsi_npg(analysis_base):
                            required=True)
         self.add_parameter(name='npg_cluster_method',
                            help='Clustering method to be used',
-                           dtype=unicode,
+                           dtype=str,
                            default='median',
                            group=groups['settings'],
                            required=True)
@@ -118,7 +118,7 @@ class omsi_npg(analysis_base):
             try:
                 return dataset[:, :]
             except:
-                print "NPG peak selection failed"
+                print("NPG peak selection failed")
                 return None
         elif viewer_option >= 0:
             return super(omsi_npg, cls).v_qslice(analysis_object, z, viewer_option - 1)
@@ -145,7 +145,7 @@ class omsi_npg(analysis_base):
             try:
                 return dataset[:]
             except:
-                print "NPG spectrum selection failed"
+                print("NPG spectrum selection failed")
                 return None
 
             #Return the spectra and indicate that no customMZ data values (i.e. None) are needed
@@ -166,13 +166,13 @@ class omsi_npg(analysis_base):
         pAILast = peaksArrayIndex.shape[0] - 1
         x_size = peaksArrayIndex[pAILast][0] + 1
         y_size = peaksArrayIndex[pAILast][1] + 1
-        valuesX = range(0, x_size)
+        valuesX = list(range(0, x_size))
         labelX = 'pixel index X'
-        valuesY = range(0, y_size)
+        valuesY = list(range(0, y_size))
         labelY = 'pixel index Y'
         if peaksArrayIndex.shape[1] > 2:
             z_size = peaksArrayIndex[pAILast][2] + 1
-            valuesZ = range(0, z_size)
+            valuesZ = list(range(0, z_size))
             labelZ = 'pixel index Z'
         else:
             valuesZ = None
@@ -241,19 +241,19 @@ class omsi_npg(analysis_base):
         clusterCut = self['npg_cluster_treecut']
         fasterHC = self['npg_fasterhc_flag'] # set to 1 to perform split fastcluster, 2 for normal fastcluster, 3 for myHC
         SplitMax = self['npg_split_max']  # size limiter for HC clutering (smaller is usually faster) used if fasterHC == 1
-        clusterMethod = unicode(self['npg_cluster_method'])  # Hierarchical Clustering agglomeration method
+        clusterMethod = str(self['npg_cluster_method'])  # Hierarchical Clustering agglomeration method
 
         # get dataset dimensions info from last peaksArrayIndex
         pAILast = peaksArrayIndex.shape[0] - 1
         Nx = peaksArrayIndex[pAILast][0] + 1
         Ny = peaksArrayIndex[pAILast][1] + 1
 
-        print "[NPG]"
-        print "NPG Parameters:"
-        print "MZ_TH =", MZ_TH, "clusterCut =", clusterCut
+        print("[NPG]")
+        print("NPG Parameters:")
+        print("MZ_TH =", MZ_TH, "clusterCut =", clusterCut)
         sys.stdout.flush()
 
-        print "Performing first pass..."
+        print("Performing first pass...")
         # each peak has a label to represent its cluster
         # all peaks are initialized to 0 = no label
         # regioncounter-1 is the last assigned cluster label
@@ -275,16 +275,16 @@ class omsi_npg(analysis_base):
         timekeep1 = time()
         percentcheck = None
         # scan top-to-bottom
-        for y in xrange(Ny - 1, -1, -1):
+        for y in range(Ny - 1, -1, -1):
             # scan left-to-right
-            for x in xrange(Nx):
+            for x in range(Nx):
                 # print "pos: ", x, y
                 percent = int(100. * float(totalcounter + 1) / float(Nx * Ny))
                 timer = str(int(time() - timekeep1))
                 eqs = str(len(equivalentLabels))
                 regions = str(regioncounter)
                 if (percent != percentcheck):
-                    print "[", percent, "% -", timer, "s - eqs:", eqs, "- regs:", regions, "] \r",
+                    print("[", percent, "% -", timer, "s - eqs:", eqs, "- regs:", regions, "] \r", end=' ')
                     sys.stdout.flush()
                     percentcheck = percent
                 totalcounter += 1
@@ -336,7 +336,7 @@ class omsi_npg(analysis_base):
                 if (CheckWest == CheckNorth == CheckNorthWest == CheckNorthEast == 0):
                     # print "NON"
                     peaksLabelsIndex = self.getCoordIdxB(x, y)
-                    for i in xrange(myPeaks.shape[0]):
+                    for i in range(myPeaks.shape[0]):
                         peaksLabels[peaksLabelsIndex] = regioncounter
                         LabelsList.append(Node(regioncounter))
                         self.MakeSet(LabelsList[-1])
@@ -360,7 +360,7 @@ class omsi_npg(analysis_base):
 
                     # for each peak in current pixel, check the
                     # appropiate neighbor pixels for similar peaks
-                    for i in xrange(myPeaks.shape[0]):
+                    for i in range(myPeaks.shape[0]):
                         currentPeak = myPeaks[i]
 
                         westFlag = 0
@@ -460,7 +460,7 @@ class omsi_npg(analysis_base):
                             choosenLabel = min(nearLabels)
 
                             # all similar coordinates belong to same region
-                            for t in xrange(nearLabelsLen - 1):
+                            for t in range(nearLabelsLen - 1):
                                 labelA = nearLabels[t]
                                 labelB = nearLabels[t + 1]
                                 if (labelA != labelB):
@@ -473,7 +473,7 @@ class omsi_npg(analysis_base):
                         else:
                             # this condition should never happen
                             # unless nearLabelsLen is negative
-                            print "Error finding nearby labels"
+                            print("Error finding nearby labels")
 
                         # current peak label resolved, move index to next peak
                         peaksLabels[peaksLabelsIndex] = choosenLabel
@@ -484,19 +484,19 @@ class omsi_npg(analysis_base):
                     # end of [else (if not init coord)] -------
                     # end of [for x in xrange(Nx)] -------
         # end of [for y in xrange(Ny-1,-1,-1)] -------
-        print "\ndone!"
+        print("\ndone!")
         sys.stdout.flush()
 
         # --- Starting Second Pass ---
-        print "Performing second pass..."
+        print("Performing second pass...")
         totalcounter = 0
         percentcheck = None
         timekeep1 = time()
-        for i in xrange(peaksLabels.shape[0]):
+        for i in range(peaksLabels.shape[0]):
             percent = int(100. * float(totalcounter + 1) / float(peaksLabels.shape[0]))
             timer = str(int(time() - timekeep1))
             if (percent != percentcheck):
-                print "[", percent, "% -", timer, "s ]\r",
+                print("[", percent, "% -", timer, "s ]\r", end=' ')
                 sys.stdout.flush()
                 percentcheck = percent
 
@@ -507,28 +507,28 @@ class omsi_npg(analysis_base):
             peaksLabels[i] = int(str(self.Find(LabelsList[mylabelIdx])))
 
             totalcounter += 1
-        print "\ndone!"
+        print("\ndone!")
         sys.stdout.flush()
 
         # total regions/labels after resolving equivalences
         UniqueLabels = [int(str(self.Find(i))) for i in LabelsList]
         UniqueLabels = np.unique(UniqueLabels)
-        print "# of regions:", UniqueLabels.shape[0]
+        print("# of regions:", UniqueLabels.shape[0])
         sys.stdout.flush()
 
         # -------- Start Hierarchical Clustering --------
         # -------- gather median info --------
-        print "\n[HC]"
-        print "Gathering NPG clusters info..."
+        print("\n[HC]")
+        print("Gathering NPG clusters info...")
 
         LabelsMedianMZ = self.getClustersInfo(peaksLabels, UniqueLabels)
 
-        print "\ndone!"
+        print("\ndone!")
 
         # ------------------------------------
         # --- Hierarchical Clustering (HC) ---
-        print "Region Labels:", len(LabelsMedianMZ)
-        print "Performing Hierarchical Clustering..."
+        print("Region Labels:", len(LabelsMedianMZ))
+        print("Performing Hierarchical Clustering...")
         sys.stdout.flush()
         timekeeper = time()
 
@@ -552,7 +552,7 @@ class omsi_npg(analysis_base):
             LMData = LabelsMedianMZ[LMArgS]
             LMDataList = self.splitLabelsList(LMData, clusterCut, SplitMax)
 
-            print "Splits:", len(LMDataList)
+            print("Splits:", len(LMDataList))
             sys.stdout.flush()
 
             PrevTCMax = 0
@@ -564,7 +564,7 @@ class omsi_npg(analysis_base):
                 percent = int(100. * float(totalcounter + 1) / float(len(LMDataList)))
                 timer = str(int(time() - timekeep1))
                 if (percent != percentcheck):
-                    print "[", percent, "% -", timer, "s ]\r",
+                    print("[", percent, "% -", timer, "s ]\r", end=' ')
                     sys.stdout.flush()
                     percentcheck = percent
 
@@ -583,8 +583,8 @@ class omsi_npg(analysis_base):
             LMArgS2 = np.argsort(LMArgS)  # reverse the sort
             TreeCut = FullTC[LMArgS2] - 1  # start labels from 0 instead of 1 temporarily
 
-        print "\ndone! [", time() - timekeeper, "s ]"
-        print "Reassigning labels..."
+        print("\ndone! [", time() - timekeeper, "s ]")
+        print("Reassigning labels...")
         sys.stdout.flush()
 
         peaksLabelsInt = peaksLabels.astype('int32')
@@ -594,9 +594,9 @@ class omsi_npg(analysis_base):
         HCLabelsList = np.arange(1, HCpeaksLabels.max() + 1)
         HCpeaksLabels = HCpeaksLabels.astype('float32')
 
-        print "done!"
+        print("done!")
 
-        print "Collecting data into HDF5..."
+        print("Collecting data into HDF5...")
 
         #Add the analysis results and parameters to the anlaysis data so that it can be accessed and written to file
         #We here convert the single scalars to 1D numpy arrays to ensure consistency. The data write function can
@@ -618,8 +618,8 @@ class omsi_npg(analysis_base):
         self['npghc_labels_list'] = np.asarray(HCLabelsList)
         self['npghc_peaks_labels'] = np.asarray(HCpeaksLabels)
 
-        print "Collecting done."
-        print "--- finished ---"
+        print("Collecting done.")
+        print("--- finished ---")
 
     # get image slice z from peak data arrays
     def record_execute_analysis_outputs(self, analysis_output):
@@ -644,8 +644,8 @@ class omsi_npg(analysis_base):
         img = np.zeros([Nx, Ny])
 
         mycounter = 0
-        for xCoord in xrange(Nx):
-            for yCoord in xrange(Ny):
+        for xCoord in range(Nx):
+            for yCoord in range(Ny):
 
                 if (xCoord == pAImaxX and yCoord == pAImaxY):
                     pStart = peaksArrayIndex[pAILast][2]
@@ -702,7 +702,7 @@ class omsi_npg(analysis_base):
         rLabels = PeaksLabels[pStart:pEnd]
         rInts = peaksIntensities[pStart:pEnd]
 
-        for i in xrange(len(rLabels)):
+        for i in range(len(rLabels)):
             mylbl = rLabels[i]
             spec[LabelsList == mylbl] = rInts[i]
 
@@ -718,7 +718,7 @@ class omsi_npg(analysis_base):
 
         dif = np.diff(thelist)
 
-        print "NPG Amount : ", len(thelist)
+        print("NPG Amount : ", len(thelist))
 
         percentcheck = None
         totalcounter = 0
@@ -730,7 +730,7 @@ class omsi_npg(analysis_base):
             percent = int(100. * float(totalcounter) / float(totallen))
             timer = int(time() - timekeep1)
             if (percent != percentcheck):
-                print "[", percent, "% - dif.min:", round(dif.min(), 4), "len:", len(thelist), "\t-", timer, "s ]\r",
+                print("[", percent, "% - dif.min:", round(dif.min(), 4), "len:", len(thelist), "\t-", timer, "s ]\r", end=' ')
                 sys.stdout.flush()
                 percentcheck = percent
             totalcounter += 1
@@ -800,7 +800,7 @@ class omsi_npg(analysis_base):
             snum = np.ceil(len(myLabels) / float(SplitMax))
             myAmnt = int(len(myLabels) / snum)
         except:
-            print "\nError splitting labels list with SplitMax =", SplitMax
+            print("\nError splitting labels list with SplitMax =", SplitMax)
             stopFlag = 1
             myLabelsList.append(myLabels)
 
@@ -832,7 +832,7 @@ class omsi_npg(analysis_base):
 
         timekeep = time()
         percentcheck = None
-        for i in xrange(len(GLabelsList)):
+        for i in range(len(GLabelsList)):
             currentlabel = GLabelsList[i]
 
             idxRight = bisect.bisect_right(SortedPL, currentlabel)
@@ -843,7 +843,7 @@ class omsi_npg(analysis_base):
             percent = int(100. * float(i + 1) / float(len(GLabelsList)))
             timer = int(time() - timekeep)
             if (percent != percentcheck):
-                print "[", i + 1, "of", len(GLabelsList), "-", percent, "% -", timer, "s ] \r",
+                print("[", i + 1, "of", len(GLabelsList), "-", percent, "% -", timer, "s ] \r", end=' ')
                 sys.stdout.flush()
                 percentcheck = percent
 
@@ -869,7 +869,7 @@ class omsi_npg(analysis_base):
 
         # check its a valid coordinate
         if (xCoord < 0 or xCoord > pAImaxX or yCoord < 0 or yCoord > pAImaxY):
-            print "Error: Invalid Coordinate"
+            print("Error: Invalid Coordinate")
             return 0
 
         else:
@@ -902,7 +902,7 @@ class omsi_npg(analysis_base):
 
         # check its a valid coordinate
         if (xCoord < 0 or xCoord > pAImaxX or yCoord < 0 or yCoord > pAImaxY):
-            print "Error: Invalid Coordinate"
+            print("Error: Invalid Coordinate")
             return 0
 
         else:
@@ -935,7 +935,7 @@ class omsi_npg(analysis_base):
 
         # check its a valid coordinate
         if (xCoord < 0 or xCoord > pAImaxX or yCoord < 0 or yCoord > pAImaxY):
-            print "Error: Invalid Coordinate"
+            print("Error: Invalid Coordinate")
             return 0
 
         else:
@@ -977,8 +977,8 @@ class omsi_npg(analysis_base):
         pEnd = 0
         pAIindex = 0
 
-        for x in xrange(Nx):
-            for y in xrange(Ny):
+        for x in range(Nx):
+            for y in range(Ny):
                 # pStart is the index location of
                 # current pixel's peaks values
                 pStart = peaksArrayIndex[pAIindex][2]
@@ -1040,8 +1040,8 @@ def main(argv=None):
 
         # Check for correct usage
     if len(argv) != 5:
-        print "USAGE: Call \"omsi_npg OMSI_FILE [expIndex dataIndex LPFanalysisIndex]   \" "
-        print "Nearby-Peaks Global peakfinding"
+        print("USAGE: Call \"omsi_npg OMSI_FILE [expIndex dataIndex LPFanalysisIndex]   \" ")
+        print("Nearby-Peaks Global peakfinding")
         exit(0)
 
     #Read the input arguments
@@ -1054,58 +1054,58 @@ def main(argv=None):
     try:
         omsiFile = omsi_file(omsiInFile)
     except:
-        print "Error opening input file:", sys.exc_info()[0]
+        print("Error opening input file:", sys.exc_info()[0])
         exit(0)
 
-    print "Input file: ", omsiInFile
-    print "LPF Analysis Index: ", analysisIndex
+    print("Input file: ", omsiInFile)
+    print("LPF Analysis Index: ", analysisIndex)
 
     #Get the experiment and data
     exp = omsiFile.get_experiment(expIndex)
     data = exp.get_msidata(dataIndex)
     analysis = exp.get_analysis(analysisIndex)
 
-    print "\n[loading data...]"
+    print("\n[loading data...]")
     peaksBins = analysis['LPF_Peaks_MZ'][:]
     peaksIntensities = analysis['LPF_Peaks_Vals'][:]
     peaksArrayIndex = analysis['LPF_Peaks_ArrayIndex'][:]
     peaksMZdata = data.mz[:]
     peaksMZ = peaksMZdata[peaksBins]
 
-    print "[done!] lpf data shapes:"
-    print "peaksBins shape: ", peaksBins.shape
-    print "peaksIntensities shape: ", peaksIntensities.shape
-    print "peaksArrayIndex shape: ", peaksArrayIndex.shape
-    print "peaksMZdata shape: ", peaksMZdata.shape
-    print "peaksMZ shape: ", peaksMZ.shape
+    print("[done!] lpf data shapes:")
+    print("peaksBins shape: ", peaksBins.shape)
+    print("peaksIntensities shape: ", peaksIntensities.shape)
+    print("peaksArrayIndex shape: ", peaksArrayIndex.shape)
+    print("peaksMZdata shape: ", peaksMZdata.shape)
+    print("peaksMZ shape: ", peaksMZ.shape)
     sys.stdout.flush()
 
     # npg
     myNPG = omsi_npg(name_key="omsi_npg_" + str(ctime()))
-    print "--- Executing NPG ---"
+    print("--- Executing NPG ---")
     #myNPG.omsi_npg_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ)
     myNPG.execute(peaksBins=peaksBins,
                   npg_peaks_Intensities=peaksIntensities,
                   npg_peaks_ArrayIndex=peaksArrayIndex,
                   peaksMZdata=peaksMZdata,
                   peaksMZ=peaksMZ)
-    print "\nResults:"
+    print("\nResults:")
     NPGPL = myNPG['npghc_peaks_labels']
-    print "NPG HC Peaks Labels: \n", NPGPL
+    print("NPG HC Peaks Labels: \n", NPGPL)
     NPGLL = myNPG['npghc_labels_list']
-    print "NPG HC Labels List: \n", NPGLL
+    print("NPG HC Labels List: \n", NPGLL)
 
-    print "\nsaving HDF5 analysis..."
+    print("\nsaving HDF5 analysis...")
     NPGanalysis, analysisindex = exp.create_analysis(myNPG)
-    print "done!"
+    print("done!")
 
-    print "npg analysis index:", analysisindex
-    print "omsi_npg complete for input file: ", omsiInFile, "\n"
+    print("npg analysis index:", analysisindex)
+    print("omsi_npg complete for input file: ", omsiInFile, "\n")
 
 
 # stop python, used for debugging
 def stop():
-    raw_input("Stop!")
+    input("Stop!")
 
 
 if __name__ == "__main__":

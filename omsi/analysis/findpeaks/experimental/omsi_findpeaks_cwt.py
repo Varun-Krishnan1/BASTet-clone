@@ -65,9 +65,9 @@ class omsi_findpeaks_cwt(analysis_base):
 
         mzindices = []
 
-        for xi in xrange(0, shape_x):
-            for yi in xrange(0, shape_y):
-                print xi, yi
+        for xi in range(0, shape_x):
+            for yi in range(0, shape_y):
+                print(xi, yi)
 
                 # Load the spectrum
                 m = msidata[xi, yi, :]
